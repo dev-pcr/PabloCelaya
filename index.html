@@ -1,0 +1,3939 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Pablo Celaya — Portfolio</title>
+  <link
+    href="https://fonts.googleapis.com/css2?family=Segoe+UI:wght@400;600&family=Cascadia+Code:wght@400;600&family=Bahnschrift&family=Creepster&display=swap"
+    rel="stylesheet">
+  <style>
+    :root {
+      --win-blue: #0078d4;
+      --win-blue-dark: #005a9e;
+      --win-accent: #00b4ff;
+      --taskbar: #202713;
+      --glass: rgba(255, 255, 255, 0.08);
+      --glass-border: rgba(255, 255, 255, 0.15);
+      --text: #e8e8e8;
+      --text-dim: #aaa;
+      --win-bg: #1a1a2e;
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: var(--win-bg);
+      width: 100vw;
+      height: 100vh;
+      overflow: hidden;
+      color: var(--text);
+      cursor: default;
+      user-select: none;
+    }
+
+    /* WALLPAPER */
+    #wallpaper {
+      position: fixed;
+      inset: 0;
+      background: url('Fondo de pantalla de Windows XP.jpg') no-repeat center center;
+      background-size: cover;
+      z-index: 0;
+    }
+
+    #wallpaper::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+    }
+
+    .stars {
+      display: none;
+    }
+
+    /* DESKTOP ICONS */
+    #desktop {
+      position: fixed;
+      inset: 0 0 48px 0;
+      z-index: 1;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, 90px);
+      grid-template-rows: repeat(auto-fill, 100px);
+      align-content: start;
+      justify-content: start;
+      gap: 4px;
+      padding: 16px;
+    }
+
+    .icon {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 8px 4px;
+      border-radius: 4px;
+      cursor: pointer;
+      transition: background 0.15s;
+      width: 90px;
+    }
+
+    .icon:hover {
+      background: rgba(255, 255, 255, 0.12);
+    }
+
+    .icon:active {
+      background: rgba(0, 120, 212, 0.3);
+    }
+
+    .icon.selected {
+      background: rgba(0, 120, 212, 0.35);
+      outline: 1px solid rgba(0, 120, 212, 0.7);
+    }
+
+    .icon-img {
+      width: 48px;
+      height: 48px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 26px;
+      flex-shrink: 0;
+    }
+
+    .icon span {
+      font-size: 11px;
+      color: #fff;
+      text-align: center;
+      line-height: 1.3;
+      text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    }
+
+    /* TASKBAR */
+    #taskbar {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 48px;
+      background: var(--taskbar);
+      backdrop-filter: blur(30px);
+      border-top: 1px solid rgba(255, 255, 255, 0.08);
+      z-index: 1000;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 4px;
+    }
+
+    .taskbar-item {
+      width: 44px;
+      height: 44px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 22px;
+      cursor: pointer;
+      transition: background 0.15s, transform 0.15s;
+      position: relative;
+    }
+
+    .taskbar-item:hover {
+      background: rgba(255, 255, 255, 0.12);
+      transform: translateY(-2px);
+    }
+
+    .taskbar-item.active::after {
+      content: '';
+      position: absolute;
+      bottom: 2px;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 16px;
+      height: 3px;
+      background: var(--win-accent);
+      border-radius: 2px;
+    }
+
+    #taskbar-left {
+      position: absolute;
+      left: 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 12px;
+      color: var(--text-dim);
+    }
+
+    #taskbar-right {
+      position: absolute;
+      right: 12px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-size: 12px;
+      color: var(--text);
+    }
+
+    #clock {
+      text-align: right;
+      line-height: 1.4;
+    }
+
+    /* WINDOWS */
+    .window {
+      position: fixed;
+      background: rgba(25, 25, 40, 0.95);
+      backdrop-filter: blur(40px);
+      border: 1px solid var(--glass-border);
+      border-radius: 10px;
+      box-shadow: 0 8px 60px rgba(0, 0, 0, 0.7), 0 0 0 0.5px rgba(255, 255, 255, 0.05) inset;
+      z-index: 100;
+      display: none;
+      flex-direction: column;
+      overflow: hidden;
+      animation: winOpen 0.22s cubic-bezier(0.34, 1.56, 0.64, 1);
+      min-width: 320px;
+      min-height: 200px;
+    }
+
+    .window.visible {
+      display: flex;
+    }
+
+    @keyframes winOpen {
+      from {
+        opacity: 0;
+        transform: scale(0.92);
+      }
+
+      to {
+        opacity: 1;
+        transform: scale(1);
+      }
+    }
+
+    .titlebar {
+      height: 36px;
+      background: rgba(255, 255, 255, 0.04);
+      border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 8px;
+      flex-shrink: 0;
+      cursor: move;
+    }
+
+    .titlebar-icon {
+      font-size: 16px;
+    }
+
+    .titlebar-title {
+      font-size: 13px;
+      font-weight: 400;
+      flex: 1;
+      color: var(--text);
+    }
+
+    .winbtn {
+      width: 46px;
+      height: 32px;
+      border-radius: 0;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 12px;
+      color: var(--text-dim);
+      transition: background 0.15s, color 0.15s;
+      font-family: 'Segoe UI', sans-serif;
+      letter-spacing: 0;
+    }
+
+    .winbtn:hover {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+    }
+
+    .winbtn.close:hover {
+      background: #c42b1c;
+      color: #fff;
+    }
+
+    .window-body {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      scrollbar-width: thin;
+      scrollbar-color: rgba(255, 255, 255, 0.2) transparent;
+    }
+
+    .window-body::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .window-body::-webkit-scrollbar-thumb {
+      background: rgba(255, 255, 255, 0.2);
+      border-radius: 3px;
+    }
+
+    /* ===================== WINDOW CONTENTS ===================== */
+
+    /* ABOUT ME */
+    #win-about {
+      width: 480px;
+      height: 520px;
+      top: 60px;
+      left: 80px;
+    }
+
+    .about-header {
+      background: linear-gradient(135deg, #0d1b3e, #16213e, #0078d4 200%);
+      padding: 32px 28px 24px;
+      display: flex;
+      gap: 20px;
+      align-items: center;
+    }
+
+    .avatar {
+      width: 72px;
+      height: 72px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0078d4, #00b4ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 32px;
+      flex-shrink: 0;
+      border: 2px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .about-info h1 {
+      font-size: 22px;
+      font-weight: 600;
+    }
+
+    .about-info .role {
+      color: var(--win-accent);
+      font-size: 13px;
+      margin-top: 3px;
+    }
+
+    .about-info .location {
+      color: var(--text-dim);
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .about-body {
+      padding: 20px 24px;
+    }
+
+    .about-body p {
+      font-size: 13px;
+      line-height: 1.7;
+      color: #ccc;
+    }
+
+    .about-links {
+      display: flex;
+      gap: 10px;
+      margin-top: 18px;
+      flex-wrap: wrap;
+    }
+
+    .link-pill {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      background: rgba(0, 120, 212, 0.2);
+      border: 1px solid rgba(0, 120, 212, 0.4);
+      border-radius: 20px;
+      padding: 5px 14px;
+      font-size: 12px;
+      cursor: pointer;
+      transition: background 0.2s;
+      color: var(--win-accent);
+      text-decoration: none;
+    }
+
+    .link-pill:hover {
+      background: rgba(0, 120, 212, 0.4);
+    }
+
+    /* SKILLS */
+    #win-skills {
+      width: 520px;
+      height: 500px;
+      top: 80px;
+      left: 200px;
+    }
+
+    .skills-body {
+      padding: 20px;
+    }
+
+    .skill-category {
+      margin-bottom: 22px;
+    }
+
+    .skill-category h3 {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--win-accent);
+      margin-bottom: 12px;
+    }
+
+    .skill-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+
+    .skill-tag {
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: 'Cascadia Code', monospace;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      background: rgba(255, 255, 255, 0.05);
+      transition: all 0.2s;
+      cursor: default;
+      position: relative;
+    }
+
+    .skill-tag:hover {
+      background: rgba(0, 120, 212, 0.25);
+      border-color: rgba(0, 120, 212, 0.6);
+      transform: translateY(-1px);
+    }
+
+    .skill-tag.lang {
+      border-color: rgba(255, 180, 0, 0.3);
+      background: rgba(255, 180, 0, 0.07);
+      color: #ffd966;
+    }
+
+    .skill-tag.fw {
+      border-color: rgba(0, 200, 120, 0.3);
+      background: rgba(0, 200, 120, 0.07);
+      color: #6edc9f;
+    }
+
+    .skill-tag.db {
+      border-color: rgba(180, 80, 255, 0.3);
+      background: rgba(180, 80, 255, 0.07);
+      color: #c084fc;
+    }
+
+    .skill-tag.tool {
+      border-color: rgba(255, 100, 80, 0.3);
+      background: rgba(255, 100, 80, 0.07);
+      color: #fca5a5;
+    }
+
+    .skill-tag.infra {
+      border-color: rgba(0, 180, 255, 0.3);
+      background: rgba(0, 180, 255, 0.07);
+      color: #67e8f9;
+    }
+
+    /* PROJECTS */
+    #win-projects {
+      width: 600px;
+      height: 560px;
+      top: 50px;
+      left: 320px;
+    }
+
+    .projects-body {
+      padding: 16px;
+    }
+
+    .project-card {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 12px;
+      transition: border-color 0.2s, background 0.2s;
+      cursor: pointer;
+    }
+
+    .project-card:hover {
+      border-color: rgba(0, 120, 212, 0.5);
+      background: rgba(0, 120, 212, 0.08);
+    }
+
+    .proj-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+    }
+
+    .proj-title {
+      font-size: 15px;
+      font-weight: 600;
+    }
+
+    .proj-badge {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: 10px;
+      font-weight: 600;
+      flex-shrink: 0;
+    }
+
+    .badge-done {
+      background: rgba(34, 197, 94, 0.2);
+      color: #86efac;
+      border: 1px solid rgba(34, 197, 94, 0.3);
+    }
+
+    .badge-wip {
+      background: rgba(234, 179, 8, 0.2);
+      color: #fde047;
+      border: 1px solid rgba(234, 179, 8, 0.3);
+    }
+
+    .proj-desc {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 6px;
+      line-height: 1.6;
+    }
+
+    .proj-stack {
+      display: flex;
+      gap: 6px;
+      margin-top: 10px;
+      flex-wrap: wrap;
+    }
+
+    .stack-chip {
+      font-size: 10px;
+      padding: 2px 8px;
+      background: rgba(255, 255, 255, 0.07);
+      border-radius: 3px;
+      font-family: 'Cascadia Code', monospace;
+      color: #ccc;
+    }
+
+    /* EXPERIENCE */
+    #win-exp {
+      width: 500px;
+      height: 480px;
+      top: 90px;
+      left: 160px;
+    }
+
+    .exp-body {
+      padding: 20px 24px;
+    }
+
+    .exp-item {
+      display: flex;
+      gap: 16px;
+      margin-bottom: 24px;
+      position: relative;
+    }
+
+    .exp-item:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 19px;
+      top: 40px;
+      width: 2px;
+      height: calc(100% - 8px);
+      background: rgba(0, 120, 212, 0.25);
+    }
+
+    .exp-dot {
+      width: 40px;
+      height: 40px;
+      border-radius: 50%;
+      background: rgba(0, 120, 212, 0.2);
+      border: 2px solid rgba(0, 120, 212, 0.5);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .exp-content {}
+
+    .exp-role {
+      font-size: 14px;
+      font-weight: 600;
+    }
+
+    .exp-company {
+      font-size: 12px;
+      color: var(--win-accent);
+      margin-top: 2px;
+    }
+
+    .exp-date {
+      font-size: 11px;
+      color: var(--text-dim);
+      margin-top: 2px;
+    }
+
+    .exp-desc {
+      font-size: 12px;
+      color: #aaa;
+      margin-top: 6px;
+      line-height: 1.6;
+    }
+
+    /* TASK MANAGER (FOR EDUCATION) */
+    #win-edu {
+      width: 900px;
+      height: 560px;
+      top: 80px;
+      left: 140px;
+    }
+
+    .tm-root {
+      display: flex;
+      flex-direction: column;
+      height: 100%;
+      background: #1a1a1a;
+      color: #e0e0e0;
+      font-size: 13px;
+    }
+
+    .tm-titlebar {
+      background: #242424;
+      padding: 8px 14px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      border-bottom: 1px solid #333;
+      flex-shrink: 0;
+      cursor: move;
+    }
+
+    .tm-titlebar-icon {
+      width: 16px;
+      height: 16px;
+      object-fit: contain;
+    }
+
+    .tm-titlebar-title {
+      font-size: 13px;
+      color: #d0d0d0;
+      flex: 1;
+    }
+
+    .tm-winbtns {
+      display: flex;
+      gap: 0;
+      margin-left: auto;
+    }
+
+    .tm-wbtn {
+      width: 46px;
+      height: 28px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 11px;
+      color: #aaa;
+      cursor: pointer;
+      border: none;
+      background: transparent;
+      transition: background .15s;
+    }
+
+    .tm-wbtn:hover {
+      background: #3a3a3a;
+    }
+
+    .tm-wbtn.close:hover {
+      background: #c42b1c;
+      color: #fff;
+    }
+
+    .tm-search {
+      background: #242424;
+      padding: 6px 14px;
+      border-bottom: 1px solid #2e2e2e;
+    }
+
+    .tm-search-inner {
+      background: #2c2c2c;
+      border: 1px solid #404040;
+      border-radius: 4px;
+      padding: 5px 12px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: #888;
+      font-size: 12px;
+    }
+
+    .tm-body {
+      display: flex;
+      flex: 1;
+      overflow: hidden;
+    }
+
+    .tm-sidebar {
+      width: 200px;
+      background: #1e1e1e;
+      border-right: 1px solid #2e2e2e;
+      padding: 8px 0;
+      flex-shrink: 0;
+    }
+
+    .tm-nav-item {
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      cursor: pointer;
+      color: #bbb;
+      font-size: 13px;
+      transition: background .12s;
+      border-left: 3px solid transparent;
+    }
+
+    .tm-nav-item:hover {
+      background: #2a2a2a;
+    }
+
+    .tm-nav-item.active {
+      background: #2d2d2d;
+      color: #fff;
+      border-left: 3px solid #0078d4;
+    }
+
+    .tm-main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .tm-toolbar {
+      padding: 8px 16px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      border-bottom: 1px solid #2a2a2a;
+      flex-shrink: 0;
+    }
+
+    .tm-toolbar-title {
+      font-size: 16px;
+      font-weight: 500;
+      color: #e5e5e5;
+    }
+
+    .tm-toolbar-actions {
+      display: flex;
+      gap: 6px;
+    }
+
+    .tm-tbtn {
+      padding: 4px 10px;
+      font-size: 12px;
+      color: #aaa;
+      border: 1px solid #3a3a3a;
+      border-radius: 4px;
+      background: #272727;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 5px;
+      transition: background .12s;
+    }
+
+    .tm-tbtn:hover {
+      background: #333;
+      color: #ddd;
+    }
+
+    .tm-table-header {
+      display: grid;
+      grid-template-columns: 1fr 110px 110px 90px 130px;
+      padding: 5px 16px;
+      border-bottom: 1px solid #2a2a2a;
+      color: #888;
+      font-size: 12px;
+      background: #1e1e1e;
+      flex-shrink: 0;
+    }
+
+    .tm-table-header span {
+      padding: 0 4px;
+    }
+
+    .tm-table-header span:not(:first-child) {
+      text-align: right;
+    }
+
+    .tm-content {
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .tm-content::-webkit-scrollbar {
+      width: 6px;
+    }
+
+    .tm-content::-webkit-scrollbar-track {
+      background: #1a1a1a;
+    }
+
+    .tm-content::-webkit-scrollbar-thumb {
+      background: #3a3a3a;
+      border-radius: 3px;
+    }
+
+    .tm-section-header {
+      padding: 7px 16px;
+      font-size: 13px;
+      font-weight: 500;
+      color: #ccc;
+      background: #1e1e1e;
+      border-bottom: 1px solid #262626;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .tm-row {
+      display: grid;
+      grid-template-columns: 1fr 110px 110px 90px 130px;
+      padding: 5px 16px;
+      border-bottom: 1px solid #232323;
+      align-items: center;
+      transition: background .1s;
+      cursor: pointer;
+    }
+
+    .tm-row:hover {
+      background: #252525;
+    }
+
+    .tm-row.selected {
+      background: #1a2e42;
+    }
+
+    .tm-cell-name {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      font-size: 13px;
+    }
+
+    .tm-icon {
+      width: 16px;
+      height: 16px;
+      border-radius: 3px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 10px;
+      flex-shrink: 0;
+    }
+
+    .tm-cell-status {
+      font-size: 12px;
+      color: #888;
+      text-align: right;
+    }
+
+    .tm-cell-val {
+      text-align: right;
+      font-size: 13px;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .bar-cell {
+      text-align: right;
+    }
+
+    .bar-wrap {
+      display: flex;
+      align-items: center;
+      justify-content: flex-end;
+      gap: 6px;
+    }
+
+    .mini-bar {
+      width: 60px;
+      height: 8px;
+      background: #2a2a2a;
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .mini-bar-fill {
+      height: 100%;
+      border-radius: 2px;
+    }
+
+    .bar-num {
+      font-size: 12px;
+      font-variant-numeric: tabular-nums;
+      min-width: 30px;
+      text-align: right;
+    }
+
+    .status-badge {
+      display: inline-block;
+      padding: 2px 8px;
+      border-radius: 3px;
+      font-size: 11px;
+      font-weight: 500;
+    }
+
+    .badge-running {
+      background: #1a3a1a;
+      color: #6db86d;
+    }
+
+    .badge-done {
+      background: #1a2a3a;
+      color: #6aadda;
+    }
+
+    .expand-arrow {
+      font-size: 10px;
+      color: #666;
+      margin-right: 4px;
+    }
+
+    .sub-row {
+      display: grid;
+      grid-template-columns: 1fr 110px 110px 90px 130px;
+      padding: 4px 16px 4px 40px;
+      border-bottom: 1px solid #1e1e1e;
+      align-items: center;
+      font-size: 12px;
+      color: #888;
+      background: #1d1d1d;
+    }
+
+    .sub-row:hover {
+      background: #222;
+    }
+
+    /* TERMINAL */
+    #win-terminal {
+      width: 560px;
+      height: 380px;
+      top: 120px;
+      left: 200px;
+    }
+
+    #win-terminal .titlebar {
+      background: rgba(0, 0, 0, 0.5);
+    }
+
+    .terminal-body {
+      background: #0c0c0c;
+      padding: 14px 16px;
+      font-family: 'Cascadia Code', monospace;
+      font-size: 13px;
+      color: #d4d4d4;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .term-line {
+      margin-bottom: 4px;
+      line-height: 1.5;
+    }
+
+    .term-prompt {
+      color: #0078d4;
+    }
+
+    .term-path {
+      color: #6edc9f;
+    }
+
+    .term-cmd {
+      color: #d4d4d4;
+    }
+
+    .term-out {
+      color: #aaa;
+    }
+
+    .term-accent {
+      color: #ffd966;
+    }
+
+    .term-success {
+      color: #86efac;
+    }
+
+    .term-cursor {
+      display: inline-block;
+      width: 8px;
+      height: 14px;
+      background: #d4d4d4;
+      animation: blink 1s step-end infinite;
+      vertical-align: text-bottom;
+    }
+
+    @keyframes blink {
+      50% {
+        opacity: 0;
+      }
+    }
+
+    #term-input-line {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      margin-top: 8px;
+    }
+
+    #term-input {
+      background: transparent;
+      border: none;
+      outline: none;
+      color: #d4d4d4;
+      font-family: 'Cascadia Code', monospace;
+      font-size: 13px;
+      flex: 1;
+    }
+
+    /* START MENU */
+    #start-menu {
+      position: fixed;
+      bottom: 56px;
+      left: 50%;
+      transform: translateX(-50%) scale(0.95);
+      width: 640px;
+      background: rgba(20, 20, 35, 0.96);
+      backdrop-filter: blur(60px);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      border-radius: 14px;
+      box-shadow: 0 -4px 60px rgba(0, 0, 0, 0.6);
+      z-index: 500;
+      padding: 24px;
+      display: none;
+      opacity: 0;
+      transition: opacity 0.2s, transform 0.2s;
+    }
+
+    #start-menu.open {
+      display: block;
+      opacity: 1;
+      transform: translateX(-50%) scale(1);
+    }
+
+    .start-search {
+      width: 100%;
+      background: rgba(255, 255, 255, 0.08);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+      border-radius: 8px;
+      padding: 10px 16px;
+      color: #fff;
+      font-size: 14px;
+      outline: none;
+      margin-bottom: 20px;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .start-section-title {
+      font-size: 11px;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: var(--text-dim);
+      margin-bottom: 12px;
+    }
+
+    .start-apps {
+      display: grid;
+      grid-template-columns: repeat(6, 1fr);
+      gap: 6px;
+      margin-bottom: 20px;
+    }
+
+    .start-app {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 5px;
+      padding: 10px 4px;
+      border-radius: 8px;
+      cursor: pointer;
+      transition: background 0.15s;
+      font-size: 11px;
+      text-align: center;
+    }
+
+    .start-app:hover {
+      background: rgba(255, 255, 255, 0.1);
+    }
+
+    .start-app .sa-icon {
+      font-size: 28px;
+    }
+
+    .start-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding-top: 16px;
+      border-top: 1px solid rgba(255, 255, 255, 0.07);
+    }
+
+    .start-user {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 13px;
+    }
+
+    .start-user .su-av {
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      background: linear-gradient(135deg, #0078d4, #00b4ff);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 16px;
+    }
+
+    .start-power {
+      width: 36px;
+      height: 36px;
+      border-radius: 6px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      cursor: pointer;
+      transition: background 0.15s;
+      border: none;
+      background: transparent;
+      color: var(--text);
+    }
+
+    .start-power:hover {
+      background: rgba(196, 43, 28, 0.3);
+    }
+
+    /* TOOLTIP */
+    .tooltip {
+      position: absolute;
+      bottom: calc(100% + 10px);
+      left: 50%;
+      transform: translateX(-50%);
+      background: rgba(30, 30, 45, 0.95);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 6px;
+      padding: 5px 10px;
+      font-size: 11px;
+      white-space: nowrap;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity 0.15s;
+    }
+
+    .taskbar-item:hover .tooltip {
+      opacity: 1;
+    }
+
+
+    /* RESIZE HANDLE */
+    .resize-handle {
+      position: absolute;
+      right: 0;
+      bottom: 0;
+      width: 16px;
+      height: 16px;
+      cursor: se-resize;
+      opacity: 0.3;
+    }
+
+    /* Progress bars in skills */
+    .skill-bar-container {
+      margin-top: 6px;
+    }
+
+    .skill-bar-label {
+      display: flex;
+      justify-content: space-between;
+      font-size: 11px;
+      color: #aaa;
+      margin-bottom: 4px;
+    }
+
+    .skill-bar {
+      height: 4px;
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+
+    .skill-bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--win-blue), var(--win-accent));
+      border-radius: 2px;
+      transition: width 1s ease;
+    }
+
+    /* Windows glow on hover */
+    .window:focus-within {
+      box-shadow: 0 8px 60px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(0, 120, 212, 0.3);
+    }
+
+    /* CONTEXT MENU */
+    .ctx-menu {
+      position: fixed;
+      background: rgba(30, 30, 45, 0.98);
+      backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.12);
+      border-radius: 8px;
+      padding: 4px;
+      min-width: 180px;
+      z-index: 10000;
+      display: none;
+      box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5);
+    }
+
+    .ctx-menu.open {
+      display: block;
+    }
+
+    .ctx-item {
+      padding: 7px 14px;
+      font-size: 13px;
+      cursor: pointer;
+      border-radius: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      transition: background 0.1s;
+    }
+
+    .ctx-item:hover {
+      background: rgba(0, 120, 212, 0.3);
+    }
+
+    .ctx-sep {
+      height: 1px;
+      background: rgba(255, 255, 255, 0.08);
+      margin: 4px 0;
+    }
+
+    /* MONKEY ASSISTANT */
+    .monkey-anim {
+      width: 180px;
+      height: 180px;
+      background-image: url('iconos/mono1.png');
+      background-size: contain;
+      background-repeat: no-repeat;
+      background-position: bottom center;
+      animation: monkeyBlink 1s infinite alternate;
+      cursor: pointer;
+      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
+      transition: transform 0.2s;
+    }
+
+    .monkey-anim:hover {
+      transform: scale(1.1);
+    }
+
+    @keyframes monkeyBlink {
+
+      0%,
+      49.9% {
+        background-image: url('iconos/mono1.png');
+      }
+
+      50%,
+      100% {
+        background-image: url('iconos/mono2.png');
+      }
+    }
+    /* CODE EDITOR STYLE FOR ABOUT */
+    #win-about {
+      width: 480px;
+      height: 520px;
+      top: 60px;
+      left: 80px;
+    }
+
+    .code-editor {
+      background: #282c34;
+      font-family: 'Cascadia Code', 'Consolas', monospace;
+      padding: 20px;
+      line-height: 1.6;
+      font-size: 14px;
+      color: #abb2bf;
+      height: 100%;
+      overflow-y: auto;
+    }
+
+    .syntax-keyword { color: #c678dd; } /* Purple */
+    .syntax-string { color: #98c379; }  /* Green */
+    .syntax-variable { color: #e06c75; } /* Red/Pink */
+    .syntax-func { color: #61afef; }     /* Blue */
+    .syntax-comment { color: #5c6370; font-style: italic; } /* Grey */
+    .syntax-num { color: #d19a66; }      /* Orange */
+
+    .indent-1 { margin-left: 20px; }
+    .indent-2 { margin-left: 40px; }
+
+    .about-links {
+      margin-top: 30px;
+      padding-top: 15px;
+      border-top: 1px solid rgba(255, 255, 255, 0.1);
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+    }
+
+    .link-pill {
+      background: rgba(255, 255, 255, 0.05);
+      padding: 6px 14px;
+      border-radius: 20px;
+      text-decoration: none;
+      color: #abb2bf;
+      font-size: 13px;
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      transition: all 0.2s;
+    }
+
+    .link-pill:hover {
+      background: rgba(97, 175, 239, 0.1);
+      border-color: #61afef;
+      color: #fff;
+    }
+
+    /* WHATSAPP SIMULATION */
+    #win-wa {
+      width: 380px;
+      height: 500px;
+    }
+
+    .wa-body {
+      background: #0b141a; /* WA Dark Background */
+      height: 100%;
+      display: flex;
+      flex-direction: column;
+      font-family: 'Segoe UI', sans-serif;
+    }
+
+    .wa-header {
+      background: #202c33;
+      padding: 10px 16px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      border-bottom: 1px solid rgba(255,255,255,0.05);
+    }
+
+    .wa-avatar {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: #6aadda;
+    }
+
+    .wa-info {
+       flex: 1;
+    }
+
+    .wa-name {
+      font-size: 14px;
+      font-weight: 600;
+      color: #e9edef;
+    }
+
+    .wa-status {
+      font-size: 11px;
+      color: #8696a0;
+    }
+
+    .wa-chat-area {
+      flex: 1;
+      padding: 20px;
+      overflow-y: auto;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      background-image: url('https://user-images.githubusercontent.com/15075759/28719144-86dc0f70-73b1-11e7-911d-60d70fcded21.png');
+      background-blend-mode: overlay;
+      background-color: rgba(11, 20, 26, 0.95);
+    }
+
+    .wa-msg {
+      max-width: 80%;
+      padding: 8px 12px;
+      border-radius: 8px;
+      font-size: 13.5px;
+      line-height: 1.4;
+      position: relative;
+    }
+
+    .wa-msg-received {
+      align-self: flex-start;
+      background: #202c33;
+      color: #e9edef;
+      border-bottom-left-radius: 2px;
+    }
+
+    .wa-msg-sent {
+      align-self: flex-end;
+      background: #005c4b;
+      color: #e9edef;
+      border-bottom-right-radius: 2px;
+    }
+
+    .wa-time {
+      font-size: 10px;
+      color: rgba(255,255,255,0.4);
+      float: right;
+      margin-top: 4px;
+      margin-left: 8px;
+    }
+
+    .wa-input-area {
+      background: #202c33;
+      padding: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .wa-input {
+      flex: 1;
+      background: #2a3942;
+      border: none;
+      border-radius: 8px;
+      padding: 9px 12px;
+      color: #e9edef;
+      font-size: 14px;
+      outline: none;
+    }
+
+    .wa-send {
+      background: #00a884;
+      border: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      color: white;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: transform 0.2s;
+    }
+
+    .wa-send:hover {
+      transform: scale(1.1);
+      background: #06cf9c;
+    }
+  </style>
+</head>
+
+<body>
+
+  <audio id="startup-sound" src="Windows 11 Startup sound.mp3" preload="auto" autoplay></audio>
+  <audio id="error-sound" src="Efecto error computadora.mp3" preload="auto"></audio>
+  <script>
+    (function () {
+      const audio = document.getElementById('startup-sound');
+      if (audio) {
+        audio.volume = 0.6;
+        audio.play().catch(e => {
+          document.addEventListener('click', function playOnFirstClick() {
+            audio.play().catch(() => { });
+            document.removeEventListener('click', playOnFirstClick);
+          }, { once: true });
+        });
+      }
+    })();
+  </script>
+
+  <div id="wallpaper">
+    <div class="stars"></div>
+  </div>
+
+  <!-- DESKTOP ICONS -->
+  <div id="desktop">
+    <div class="icon" ondblclick="openWindow('win-about')">
+      <div class="icon-img"><img src="iconos/user.png" alt="Usuario"
+          style="width: 48px; height: 48px; object-fit: cover; border-radius: 50%;"></div>
+      <span>Sobre Mí</span>
+    </div>
+    <div class="icon" ondblclick="openWindow('win-skills')">
+      <div class="icon-img">⚙️</div>
+      <span>Skills</span>
+    </div>
+    <div class="icon" ondblclick="openWindow('win-exp')">
+      <div class="icon-img"><img src="iconos/Instagram-Logo-2016.png"
+          style="width: 48px; height: 48px; object-fit: contain;">
+      </div>
+      <span>Instagram</span>
+    </div>
+    <div class="icon" ondblclick="openWindow('win-edu')">
+      <div class="icon-img"><img src="iconos/admtareas.png" alt="Tareas"
+          style="width: 56px; height: 56px; object-fit: contain;"></div>
+      <span>Tareas</span>
+    </div>
+    <div class="icon" ondblclick="openWindow('win-terminal')">
+      <div class="icon-img"><img src="iconos/cmd.png" alt="cmd"
+          style="width: 48px; height: 48px; object-fit: cover; border-radius: 12px;"></div>
+      <span>Terminal</span>
+    </div>
+    <div class="icon" ondblclick="openWindow('win-wa')">
+      <div class="icon-img"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA"
+          style="width: 48px; height: 48px; object-fit: contain;"></div>
+      <span>WhatsApp</span>
+    </div>
+  </div>
+
+  <!-- ============ WINDOWS ============ -->
+
+  <!-- ABOUT -->
+  <div class="window" id="win-about">
+    <div class="titlebar" onmousedown="startDrag(event,'win-about')">
+      <img src="iconos/user.png" class="titlebar-icon"
+        style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;">
+      <span class="titlebar-title">Sobre Mí — Pablo Celaya</span>
+      <button class="winbtn" onclick="minimizeWindow('win-about')">─</button>
+      <button class="winbtn" onclick="maximizeWindow('win-about')">□</button>
+      <button class="winbtn close" onclick="closeWindow('win-about')">✕</button>
+    </div>
+    <div class="window-body">
+      <div class="code-editor">
+        <div><span class="syntax-keyword">class</span> <span class="syntax-func">PabloCelaya</span>:</div>
+        <div class="indent-1"><span class="syntax-keyword">def</span> <span class="syntax-func">__init__</span>(<span class="syntax-variable">self</span>):</div>
+        <div class="indent-2"><span class="syntax-variable">self</span>.nombre = <span class="syntax-string">"PABLO NICOLÁS CELAYA RÍOS"</span></div>
+        <div class="indent-2"><span class="syntax-variable">self</span>.educacion = <span class="syntax-string">"Ingeniería en Informática @ UCASAL (4° año)"</span></div>
+        <div class="indent-2"><span class="syntax-variable">self</span>.ubicacion = <span class="syntax-string">"Salta, Argentina"</span></div>
+        <div class="indent-2"><span class="syntax-variable">self</span>.alias = <span class="syntax-string">"Gordo compu"</span></div>
+        <div class="indent-1"></div>
+        <div class="indent-1"><span class="syntax-keyword">def</span> <span class="syntax-func">get_focus</span>(<span class="syntax-variable">self</span>):</div>
+        <div class="indent-2"><span class="syntax-keyword">return</span> [<span class="syntax-string">"Backend"</span>, <span class="syntax-string">"Sistemas ERP"</span>, <span class="syntax-string">"Arquitectura"</span>]</div>
+        <div class="indent-1"></div>
+        <div class="indent-1"><span class="syntax-keyword">def</span> <span class="syntax-func">get_current_work</span>(<span class="syntax-variable">self</span>):</div>
+        <div class="indent-2"><span class="syntax-keyword">return</span> <span class="syntax-string">"Desarrollando plataforma de asignación docente y gestión veterinaria."</span></div>
+        <div class="indent-1"></div>
+        <div class="indent-1"><span class="syntax-keyword">def</span> <span class="syntax-func">get_bio</span>(<span class="syntax-variable">self</span>):</div>
+        <div class="indent-2"><span class="syntax-keyword">return</span> <span class="syntax-string">"Enfoque en sistemas eficientes, escalables y con impacto real."</span></div>
+        
+        <div class="about-links">
+          <a class="link-pill" href="https://github.com/pablocelaya" target="_blank">⌬ GitHub</a>
+          <a class="link-pill" href="https://linkedin.com/in/pablo-nicolas-celaya-rios-228322240" target="_blank">in LinkedIn</a>
+          <a class="link-pill" href="mailto:pablocelayarios@gmail.com">✉ Email</a>
+          <a class="link-pill" href="https://wa.me/543875122693" target="_blank">📱 WhatsApp</a>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SKILLS -->
+  <div class="window" id="win-skills">
+    <div class="titlebar" onmousedown="startDrag(event,'win-skills')">
+      <span class="titlebar-icon">⚙️</span>
+      <span class="titlebar-title">Skills</span>
+      <button class="winbtn" onclick="minimizeWindow('win-skills')">—</button>
+      <button class="winbtn" onclick="maximizeWindow('win-skills')">⬜</button>
+      <button class="winbtn close" onclick="closeWindow('win-skills')">✕</button>
+    </div>
+    <div class="window-body">
+      <div class="skills-body">
+        <div class="skill-category">
+          <h3>Lenguajes</h3>
+          <div class="skill-tags">
+            <span class="skill-tag lang">Python</span>
+            <span class="skill-tag lang">JavaScript</span>
+            <span class="skill-tag lang">TypeScript</span>
+            <span class="skill-tag lang">Java</span>
+            <span class="skill-tag lang">C / C++</span>
+            <span class="skill-tag lang">SQL</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3>Frameworks & Librerías</h3>
+          <div class="skill-tags">
+            <span class="skill-tag fw">React</span>
+            <span class="skill-tag fw">Node.js</span>
+            <span class="skill-tag fw">Express</span>
+            <span class="skill-tag fw">FastAPI</span>
+            <span class="skill-tag fw">Django</span>
+            <span class="skill-tag fw">Next.js</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3>Bases de Datos</h3>
+          <div class="skill-tags">
+            <span class="skill-tag db">SQL Server</span>
+            <span class="skill-tag db">MySQL</span>
+            <span class="skill-tag db">Firebase</span>
+          </div>
+        </div>
+        <div class="skill-category">
+          <h3>Herramientas</h3>
+          <div class="skill-tags">
+            <span class="skill-tag tool">Git</span>
+            <span class="skill-tag tool">VS Code</span>
+            <span class="skill-tag tool">Figma</span>
+            <span class="skill-tag tool">ClickUp</span>
+            <span class="skill-tag tool">Notion</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- PROJECTS -->
+
+
+  <!-- EXPERIENCE -->
+  <div class="window" id="win-exp" style="padding:0; overflow:hidden; background:#fff;">
+    <style>
+      /* Estilos IG integrados en win-exp */
+      #win-exp {
+        --bg: #ffffff;
+        --surface: #fafafa;
+        --surface2: #efefef;
+        --border: #dbdbdb;
+        --text: #262626;
+        --text2: #8e8e8e;
+        --text3: #c7c7c7;
+        --accent: #0095f6;
+        --accent2: #ed4956;
+        --accent3: #0095f6;
+        --font: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+        --mono: monospace;
+        color: var(--text);
+        font-family: var(--font);
+      }
+
+      #win-exp .app {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        background: var(--bg);
+        position: relative;
+        overflow-y: auto;
+        overflow-x: hidden;
+      }
+
+      /* TOP BAR */
+      #win-exp .topbar {
+        position: sticky;
+        top: 0;
+        z-index: 100;
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(16px);
+        border-bottom: 1px solid var(--border);
+        padding: 12px 16px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+
+      #win-exp .topbar-logo {
+        font-family: var(--font);
+        font-size: 20px;
+        font-weight: 700;
+        letter-spacing: -0.5px;
+        color: var(--text);
+      }
+
+      #win-exp .topbar-logo span {
+        color: var(--text);
+      }
+
+      #win-exp .topbar-icons {
+        display: flex;
+        gap: 18px;
+        align-items: center;
+      }
+
+      #win-exp .topbar-icons svg {
+        width: 22px;
+        height: 22px;
+        fill: none;
+        stroke: var(--text);
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+        cursor: pointer;
+      }
+
+      #win-exp .topbar-icons svg:hover {
+        stroke: var(--accent);
+        transition: stroke .2s;
+      }
+
+      #win-exp .notif-dot {
+        position: relative;
+      }
+
+      #win-exp .notif-dot::after {
+        content: '';
+        position: absolute;
+        top: -2px;
+        right: -2px;
+        width: 7px;
+        height: 7px;
+        background: var(--accent2);
+        border-radius: 50%;
+        border: 1.5px solid #fff;
+      }
+
+      /* STORIES */
+      #win-exp .stories-wrap {
+        padding: 14px 0 12px;
+        border-bottom: 1px solid var(--border);
+        overflow: visible;
+        flex-shrink: 0;
+      }
+
+      #win-exp .stories-scroll {
+        display: flex;
+        gap: 14px;
+        overflow-x: auto;
+        padding: 0 16px 4px;
+        scrollbar-width: none;
+      }
+
+      #win-exp .stories-scroll::-webkit-scrollbar {
+        display: none;
+      }
+
+      #win-exp .story {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+        cursor: pointer;
+      }
+
+      #win-exp .story-ring {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        padding: 2.5px;
+        background: conic-gradient(#f9a825, #f44336, #9c27b0, #f9a825);
+        transition: transform .2s;
+      }
+
+      #win-exp .story-ring:hover {
+        transform: scale(1.06);
+      }
+
+      #win-exp .story-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: var(--surface2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 22px;
+        border: 2.5px solid #fff;
+      }
+
+      #win-exp .story-ring.seen {
+        background: var(--border);
+      }
+
+      #win-exp .story-ring.seen .story-inner {
+        border-color: #fff;
+      }
+
+      #win-exp .story-name {
+        font-size: 11px;
+        color: var(--text2);
+        max-width: 60px;
+        text-align: center;
+        line-height: 1.2;
+      }
+
+      /* PROFILE HEADER */
+      #win-exp .profile {
+        padding: 20px 16px 16px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      #win-exp .profile-top {
+        display: flex;
+        align-items: center;
+        gap: 20px;
+        margin-bottom: 16px;
+      }
+
+      #win-exp .profile-avatar-wrap {
+        width: 80px;
+        height: 80px;
+        border-radius: 50%;
+        padding: 2.5px;
+        background: conic-gradient(#f9a825, #f44336, #9c27b0, #f9a825);
+        flex-shrink: 0;
+      }
+
+      #win-exp .profile-avatar {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        background: var(--surface2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 36px;
+        border: 3px solid #fff;
+        overflow: hidden;
+      }
+
+      #win-exp .profile-stats {
+        display: flex;
+        gap: 20px;
+        flex: 1;
+        justify-content: center;
+      }
+
+      #win-exp .stat {
+        text-align: center;
+        cursor: pointer;
+      }
+
+      #win-exp .stat-num {
+        font-size: 17px;
+        font-weight: 700;
+        display: block;
+      }
+
+      #win-exp .stat-label {
+        font-size: 12px;
+        color: var(--text2);
+      }
+
+      #win-exp .profile-info {
+        padding: 0 2px;
+      }
+
+      #win-exp .profile-name {
+        font-size: 14px;
+        font-weight: 700;
+      }
+
+      #win-exp .profile-role {
+        font-size: 13px;
+        color: var(--accent);
+        font-family: var(--mono);
+        margin-top: 1px;
+      }
+
+      #win-exp .profile-bio {
+        font-size: 13px;
+        color: var(--text2);
+        margin-top: 5px;
+        line-height: 1.5;
+      }
+
+      #win-exp .profile-bio a {
+        color: var(--accent3);
+        text-decoration: none;
+      }
+
+      #win-exp .profile-actions {
+        display: flex;
+        gap: 8px;
+        margin-top: 12px;
+      }
+
+      #win-exp .btn-follow {
+        flex: 1;
+        padding: 7px 0;
+        background: var(--accent);
+        color: #fff;
+        border: none;
+        border-radius: 8px;
+        font-family: var(--font);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: opacity .15s;
+      }
+
+      #win-exp .btn-follow:hover {
+        opacity: .85;
+      }
+
+      #win-exp .btn-msg {
+        flex: 1;
+        padding: 7px 0;
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-family: var(--font);
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background .15s;
+      }
+
+      #win-exp .btn-msg:hover {
+        background: #e8e8e8;
+      }
+
+      #win-exp .btn-more {
+        padding: 7px 12px;
+        background: var(--surface2);
+        color: var(--text);
+        border: 1px solid var(--border);
+        border-radius: 8px;
+        font-size: 14px;
+        cursor: pointer;
+      }
+
+      /* HIGHLIGHTS */
+      #win-exp .highlights {
+        padding: 12px 0 14px;
+        border-bottom: 1px solid var(--border);
+      }
+
+      #win-exp .highlights-scroll {
+        display: flex;
+        gap: 16px;
+        overflow-x: auto;
+        padding: 0 16px;
+        scrollbar-width: none;
+      }
+
+      #win-exp .highlights-scroll::-webkit-scrollbar {
+        display: none;
+      }
+
+      #win-exp .hl {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        flex-shrink: 0;
+        cursor: pointer;
+      }
+
+      #win-exp .hl-ring {
+        width: 62px;
+        height: 62px;
+        border-radius: 50%;
+        border: 1px solid var(--border);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 26px;
+        background: var(--surface2);
+        transition: border-color .2s, transform .2s;
+      }
+
+      #win-exp .hl-ring:hover {
+        border-color: var(--accent);
+        transform: scale(1.05);
+      }
+
+      #win-exp .hl-name {
+        font-size: 11px;
+        color: var(--text2);
+      }
+
+      /* TABS */
+      #win-exp .tabs {
+        display: flex;
+        border-bottom: 1px solid var(--border);
+        position: sticky;
+        top: 52px;
+        z-index: 90;
+        background: var(--bg);
+      }
+
+      #win-exp .tab {
+        flex: 1;
+        padding: 12px 0;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        cursor: pointer;
+        border-bottom: 2px solid transparent;
+        transition: border-color .2s, color .2s;
+        color: var(--text3);
+      }
+
+      #win-exp .tab.active {
+        border-bottom-color: var(--text);
+        color: var(--text);
+      }
+
+      #win-exp .tab svg {
+        width: 22px;
+        height: 22px;
+        fill: currentColor;
+      }
+
+      /* GRID */
+      #win-exp .grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 2px;
+        padding: 2px 0;
+      }
+
+      #win-exp .grid-item {
+        aspect-ratio: 1;
+        background: var(--surface2);
+        position: relative;
+        cursor: pointer;
+        overflow: hidden;
+      }
+
+      #win-exp .grid-item:hover .grid-overlay {
+        opacity: 1;
+      }
+
+      #win-exp .grid-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+      }
+
+      #win-exp .grid-item-icon {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 20px;
+        height: 20px;
+        z-index: 5;
+        background-repeat: no-repeat;
+        background-size: contain;
+        filter: drop-shadow(0 0 2px rgba(0, 0, 0, 0.5));
+      }
+
+      #win-exp .carousel-icon {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M19 15V5c0-1.103-.897-2-2-2H7c-1.103 0-2 .897-2 2v10c0 1.103.897 2 2 2h10c1.103 0 2-.897 2-2zM7 5h10l.001 10H7V5z"/><path d="M21 19V9h-1v10H10v1H20c.552 0 1-.448 1-1z"/></svg>');
+      }
+
+      #win-exp .reel-icon {
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="white"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/></svg>');
+      }
+
+      /* MODAL OVERLAY */
+      #win-exp .ig-modal-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.7);
+        backdrop-filter: blur(8px);
+        z-index: 1000;
+        display: none;
+        justify-content: center;
+        align-items: flex-start;
+        /* FIX: align to top so modal is always visible */
+        padding-top: 20px;
+        overflow-y: auto;
+        animation: fadeIn 0.2s ease-out;
+      }
+
+      #win-exp .ig-modal-overlay.open {
+        display: flex !important;
+      }
+
+      #win-exp .ig-modal-content {
+        background: white;
+        width: 90%;
+        max-height: 85%;
+        min-height: 300px;
+        max-width: 935px;
+        display: flex;
+        position: relative;
+        box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+        border-radius: 4px;
+        overflow: hidden;
+        flex-shrink: 0;
+        margin-bottom: 20px;
+      }
+
+      #win-exp .ig-modal-close {
+        position: absolute;
+        top: -30px;
+        right: -30px;
+        background: none;
+        border: none;
+        color: white;
+        font-size: 24px;
+        cursor: pointer;
+      }
+
+      #win-exp .ig-modal-left {
+        flex: 1;
+        background: #000;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        position: relative;
+        overflow: hidden;
+      }
+
+      #win-exp .ig-modal-right {
+        width: 335px;
+        display: flex;
+        flex-direction: column;
+        background: white;
+        border-left: 1px solid #efefef;
+      }
+
+      /* MODAL CAROUSEL */
+      #win-exp .modal-carousel-track {
+        display: flex;
+        width: 100%;
+        height: 100%;
+        transition: transform 0.3s cubic-bezier(0.2, 0, 0.2, 1);
+      }
+
+      #win-exp .modal-carousel-track img {
+        min-width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      #win-exp .modal-nav {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        background: rgba(255, 255, 255, 0.8);
+        border: none;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 10;
+        font-weight: bold;
+      }
+
+      #win-exp .modal-nav.prev {
+        left: 10px;
+      }
+
+      #win-exp .modal-nav.next {
+        right: 10px;
+      }
+
+      #win-exp .modal-counter {
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        background: rgba(0, 0, 0, 0.6);
+        color: white;
+        padding: 4px 10px;
+        border-radius: 20px;
+        font-size: 12px;
+      }
+
+      /* MODAL RIGHT SIDE */
+      #win-exp .modal-right-header {
+        padding: 14px;
+        display: flex;
+        align-items: center;
+        border-bottom: 1px solid #efefef;
+      }
+
+      #win-exp .modal-av {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        margin-right: 12px;
+      }
+
+      #win-exp .modal-user-info {
+        display: flex;
+        flex-direction: column;
+        flex: 1;
+      }
+
+      #win-exp .modal-username {
+        font-weight: 600;
+        font-size: 14px;
+      }
+
+      #win-exp .modal-location {
+        font-size: 12px;
+        color: #666;
+      }
+
+      #win-exp .modal-more {
+        background: none;
+        border: none;
+        font-size: 18px;
+        cursor: pointer;
+      }
+
+      #win-exp .modal-right-body {
+        flex: 1;
+        overflow-y: auto;
+        padding: 14px;
+      }
+
+      #win-exp .modal-caption-wrap {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 16px;
+      }
+
+      #win-exp #modal-caption {
+        font-size: 14px;
+        line-height: 1.4;
+      }
+
+      #win-exp .modal-hashtags {
+        font-size: 14px;
+        color: #00376b;
+        margin-top: 8px;
+      }
+
+      #win-exp .modal-right-footer {
+        padding: 14px;
+        border-top: 1px solid #efefef;
+      }
+
+      #win-exp .modal-actions {
+        display: flex;
+        justify-content: space-between;
+        margin-bottom: 12px;
+      }
+
+      #win-exp .actions-left {
+        display: flex;
+        gap: 16px;
+      }
+
+      #win-exp .modal-actions svg {
+        width: 24px;
+        height: 24px;
+        cursor: pointer;
+      }
+
+      #win-exp .modal-likes-count {
+        font-size: 14px;
+        font-weight: 600;
+        margin-bottom: 8px;
+      }
+
+      #win-exp .modal-date {
+        font-size: 10px;
+        color: #8e8e8e;
+        text-transform: uppercase;
+        margin-bottom: 12px;
+      }
+
+      #win-exp .modal-add-comment {
+        display: flex;
+        align-items: center;
+        border-top: 1px solid #efefef;
+        padding: 12px 0 0 0;
+        gap: 12px;
+      }
+
+      #win-exp .modal-add-comment input {
+        flex: 1;
+        border: none;
+        font-size: 14px;
+        outline: none;
+      }
+
+      #win-exp .modal-add-comment button {
+        background: none;
+        border: none;
+        color: #0095f6;
+        font-weight: 600;
+        cursor: pointer;
+        opacity: 0.5;
+      }
+
+      #win-exp .fake-comment {
+        font-size: 14px;
+        margin-bottom: 12px;
+      }
+
+      @keyframes fadeIn {
+        from {
+          opacity: 0;
+        }
+
+        to {
+          opacity: 1;
+        }
+      }
+
+      #win-exp .grid-item:hover .grid-thumb {
+        transform: scale(1.08);
+      }
+
+      #win-exp .grid-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        opacity: 0;
+        transition: opacity .2s;
+        color: #fff;
+        font-size: 13px;
+        font-weight: 700;
+      }
+
+      #win-exp .grid-overlay span {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      #win-exp .carousel-badge {
+        position: absolute;
+        top: 8px;
+        right: 8px;
+        width: 20px;
+        height: 20px;
+      }
+
+      /* FEED */
+      #win-exp #tab-feed {
+        display: none;
+        flex-direction: column;
+        padding-bottom: 20px;
+      }
+
+      #win-exp #tab-feed.active-tab {
+        display: flex;
+      }
+
+      #win-exp #tab-grid {
+        display: none;
+        padding-bottom: 20px;
+      }
+
+      #win-exp #tab-grid.active-tab {
+        display: block;
+      }
+
+      /* POST */
+      #win-exp .post {
+        border-bottom: 1px solid var(--border);
+        padding-bottom: 4px;
+        animation: fadeUp .4s ease both;
+      }
+
+      @keyframes fadeUp {
+        from {
+          opacity: 0;
+          transform: translateY(14px);
+        }
+
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      #win-exp .post-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 12px 14px;
+      }
+
+      #win-exp .post-av {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--surface2), #222);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 16px;
+        border: 1.5px solid var(--border);
+        flex-shrink: 0;
+      }
+
+      #win-exp .post-meta {
+        flex: 1;
+      }
+
+      #win-exp .post-user {
+        font-size: 13px;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+      }
+
+      #win-exp .post-user .verified {
+        color: var(--accent3);
+        font-size: 11px;
+      }
+
+      #win-exp .post-location {
+        font-size: 11px;
+        color: var(--text2);
+        margin-top: 1px;
+      }
+
+      #win-exp .post-more {
+        font-size: 20px;
+        color: var(--text2);
+        cursor: pointer;
+        padding: 4px;
+      }
+
+      /* CAROUSEL */
+      #win-exp .carousel-wrap {
+        position: relative;
+        overflow: hidden;
+        background: var(--surface);
+        aspect-ratio: 1;
+        width: 100%;
+      }
+
+      #win-exp .carousel-track {
+        display: flex;
+        transition: transform .35s cubic-bezier(.4, 0, .2, 1);
+        height: 100%;
+      }
+
+      #win-exp .carousel-slide {
+        flex-shrink: 0;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        gap: 12px;
+        padding: 24px;
+        position: relative;
+      }
+
+      #win-exp .slide-bg-1 {
+        background: linear-gradient(145deg, #0d1b2a, #1a3a5c);
+      }
+
+      #win-exp .slide-bg-2 {
+        background: linear-gradient(145deg, #1a0d2e, #3a1a5c);
+      }
+
+      #win-exp .slide-bg-3 {
+        background: linear-gradient(145deg, #0d2a1a, #1a5c3a);
+      }
+
+      #win-exp .slide-bg-4 {
+        background: linear-gradient(145deg, #2a1a0d, #5c3a1a);
+      }
+
+      #win-exp .slide-icon {
+        font-size: 56px;
+        filter: drop-shadow(0 4px 20px rgba(0, 0, 0, .4));
+      }
+
+      #win-exp .slide-tag {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        font-family: var(--mono);
+        font-size: 10px;
+        background: rgba(0, 0, 0, .5);
+        border: 1px solid rgba(255, 255, 255, .1);
+        padding: 3px 8px;
+        border-radius: 4px;
+        color: rgba(255, 255, 255, .7);
+        backdrop-filter: blur(8px);
+      }
+
+      #win-exp .slide-counter {
+        position: absolute;
+        top: 14px;
+        right: 14px;
+        font-size: 11px;
+        font-weight: 500;
+        background: rgba(0, 0, 0, .5);
+        padding: 3px 9px;
+        border-radius: 20px;
+        color: rgba(255, 255, 255, .8);
+        backdrop-filter: blur(8px);
+      }
+
+      #win-exp .slide-title {
+        font-size: 22px;
+        font-weight: 700;
+        text-align: center;
+        line-height: 1.2;
+        color: #fff;
+        text-shadow: 0 2px 12px rgba(0, 0, 0, .5);
+      }
+
+      #win-exp .slide-subtitle {
+        font-size: 13px;
+        color: rgba(255, 255, 255, .6);
+        text-align: center;
+        font-family: var(--mono);
+        max-width: 280px;
+        line-height: 1.5;
+      }
+
+      #win-exp .slide-chips {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 6px;
+        justify-content: center;
+      }
+
+      #win-exp .chip {
+        font-size: 11px;
+        font-family: var(--mono);
+        padding: 3px 10px;
+        border-radius: 20px;
+        background: rgba(255, 255, 255, .1);
+        border: 1px solid rgba(255, 255, 255, .15);
+        color: rgba(255, 255, 255, .8);
+      }
+
+      #win-exp .slide-stat {
+        font-size: 11px;
+        color: rgba(255, 255, 255, .4);
+        text-align: center;
+      }
+
+      #win-exp .slide-detail {
+        gap: 8px;
+      }
+
+      #win-exp .slide-detail .slide-title {
+        font-size: 16px;
+      }
+
+      #win-exp .slide-feature {
+        display: flex;
+        align-items: flex-start;
+        gap: 8px;
+        width: 100%;
+        max-width: 320px;
+        padding: 8px 10px;
+        background: rgba(255, 255, 255, .07);
+        border-radius: 8px;
+        border: 1px solid rgba(255, 255, 255, .08);
+      }
+
+      #win-exp .feature-icon {
+        font-size: 18px;
+        flex-shrink: 0;
+      }
+
+      #win-exp .feature-text {
+        font-size: 12px;
+        color: rgba(255, 255, 255, .7);
+        line-height: 1.5;
+      }
+
+      #win-exp .feature-text strong {
+        display: block;
+        font-size: 13px;
+        color: #fff;
+        font-weight: 500;
+        margin-bottom: 1px;
+      }
+
+      #win-exp .carousel-btn {
+        position: absolute;
+        top: 50%;
+        transform: translateY(-50%);
+        width: 32px;
+        height: 32px;
+        background: rgba(255, 255, 255, .15);
+        backdrop-filter: blur(8px);
+        border: none;
+        border-radius: 50%;
+        color: #fff;
+        font-size: 16px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: background .15s, transform .15s;
+        z-index: 10;
+      }
+
+      #win-exp .carousel-btn:hover {
+        background: rgba(255, 255, 255, .28);
+        transform: translateY(-50%) scale(1.08);
+      }
+
+      #win-exp .carousel-btn.prev {
+        left: 10px;
+      }
+
+      #win-exp .carousel-btn.next {
+        right: 10px;
+      }
+
+      #win-exp .carousel-dots {
+        display: flex;
+        justify-content: center;
+        gap: 4px;
+        padding: 8px 0 4px;
+      }
+
+      #win-exp .dot {
+        width: 5px;
+        height: 5px;
+        border-radius: 50%;
+        background: var(--border);
+        transition: all .25s;
+        cursor: pointer;
+      }
+
+      #win-exp .dot.active {
+        background: var(--text);
+        width: 16px;
+        border-radius: 3px;
+      }
+
+      /* ACTIONS */
+      #win-exp .post-actions {
+        padding: 4px 14px 2px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+      }
+
+      #win-exp .action-btn {
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: var(--text);
+        font-size: 13px;
+        padding: 4px 0;
+        transition: transform .15s;
+      }
+
+      #win-exp .action-btn:hover {
+        transform: scale(1.08);
+      }
+
+      #win-exp .action-btn svg {
+        width: 24px;
+        height: 24px;
+        fill: none;
+        stroke: currentColor;
+        stroke-width: 1.8;
+        stroke-linecap: round;
+        stroke-linejoin: round;
+      }
+
+      #win-exp .action-btn.liked svg {
+        fill: var(--accent2);
+        stroke: var(--accent2);
+      }
+
+      #win-exp .action-btn.bookmarked svg {
+        fill: var(--text);
+      }
+
+      #win-exp .action-spacer {
+        margin-left: auto;
+      }
+
+      #win-exp .post-likes {
+        padding: 0 14px 3px;
+        font-size: 13px;
+        font-weight: 700;
+        color: var(--text);
+      }
+
+      #win-exp .post-caption {
+        padding: 0 14px 6px;
+        font-size: 13px;
+        line-height: 1.5;
+        color: var(--text);
+      }
+
+      #win-exp .post-caption .username {
+        font-weight: 700;
+        margin-right: 5px;
+      }
+
+      #win-exp .post-caption .hashtag {
+        color: var(--accent);
+      }
+
+      #win-exp .post-comments {
+        padding: 0 14px 3px;
+        font-size: 13px;
+        color: var(--text2);
+        cursor: pointer;
+      }
+
+      #win-exp .post-time {
+        padding: 0 14px 10px;
+        font-size: 11px;
+        color: var(--text3);
+        text-transform: uppercase;
+        letter-spacing: .5px;
+      }
+
+      /* COMMENT INPUT */
+      #win-exp .comment-bar {
+        padding: 8px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        border-top: 1px solid var(--border);
+        background: var(--bg);
+      }
+
+      #win-exp .comment-av {
+        width: 28px;
+        height: 28px;
+        border-radius: 50%;
+        background: var(--surface2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        flex-shrink: 0;
+        overflow: hidden;
+      }
+
+      #win-exp .comment-input {
+        flex: 1;
+        background: none;
+        border: none;
+        outline: none;
+        font-family: var(--font);
+        font-size: 13px;
+        color: var(--text);
+      }
+
+      #win-exp .comment-input::placeholder {
+        color: var(--text2);
+      }
+
+      #win-exp .comment-send {
+        font-size: 13px;
+        color: var(--accent);
+        font-weight: 700;
+        cursor: pointer;
+        background: none;
+        border: none;
+        font-family: var(--font);
+      }
+    </style>
+
+    <!-- TITLE BAR -->
+    <div class="titlebar" onmousedown="startDrag(event,'win-exp')">
+      <img src="iconos/Instagram-Logo-2016.png" class="titlebar-icon"
+        style="width:16px; height:16px; object-fit:contain;">
+      <!-- FIX 1: Changed "alexdev" to "pablocelaya" -->
+      <span class="titlebar-title">@pablocelaya — Instagram Portfolio</span>
+      <button class="winbtn" onclick="minimizeWindow('win-exp')">—</button>
+      <button class="winbtn" onclick="maximizeWindow('win-exp')">⬜</button>
+      <button class="winbtn close" onclick="closeWindow('win-exp')">✕</button>
+    </div>
+
+    <div class="app" id="ig-app">
+      <!-- TOP BAR -->
+      <div class="topbar">
+        <!-- FIX 1: Also updated topbar logo -->
+        <div class="topbar-logo">@<span>pablocelaya</span></div>
+        <div class="topbar-icons">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="18" rx="3" />
+            <path d="M12 8v8M8 12h8" />
+          </svg>
+          <div class="notif-dot"><svg viewBox="0 0 24 24">
+              <path
+                d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
+            </svg></div>
+          <svg viewBox="0 0 24 24">
+            <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" />
+          </svg>
+        </div>
+      </div>
+      <!-- STORIES -->
+      <div class="stories-wrap">
+        <div class="stories-scroll">
+          <div class="story">
+            <div class="story-ring">
+              <div class="story-inner"><img src="iconos/user.png"
+                  style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
+            </div><span class="story-name">Tu historia</span>
+          </div>
+          <div class="story">
+            <div class="story-ring">
+              <div class="story-inner">🌿</div>
+            </div><span class="story-name">Garden</span>
+          </div>
+          <div class="story">
+            <div class="story-ring">
+              <div class="story-inner">🥽</div>
+            </div><span class="story-name">Innovar</span>
+          </div>
+          <div class="story">
+            <div class="story-ring">
+              <div class="story-inner">📐</div>
+            </div><span class="story-name">Plotter</span>
+          </div>
+          <div class="story">
+            <div class="story-ring">
+              <div class="story-inner">🍷</div>
+            </div><span class="story-name">Bodega</span>
+          </div>
+          <div class="story">
+            <div class="story-ring">
+              <div class="story-inner">☕</div>
+            </div><span class="story-name">Café</span>
+          </div>
+        </div>
+      </div>
+      <!-- PROFILE -->
+      <div class="profile">
+        <div class="profile-top">
+          <div class="profile-avatar-wrap">
+            <div class="profile-avatar"><img src="iconos/user.png"
+                style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
+          </div>
+          <div class="profile-stats">
+            <div class="stat"><span class="stat-num">+11</span><span class="stat-label">proyectos</span></div>
+            <div class="stat"><span class="stat-num">1.2k</span><span class="stat-label">seguidores</span></div>
+            <div class="stat"><span class="stat-num">84</span><span class="stat-label">seguidos</span></div>
+          </div>
+        </div>
+        <div class="profile-info">
+          <div class="profile-name">PABLO NICOLÁS CELAYA RÍOS 🚀</div>
+          <div class="profile-role">// Ingeniería en Informática · UCASAL</div>
+          <div class="profile-bio">
+            Construyendo el futuro con hardware y software 💻<br>
+            <a href="https://github.com/pablocelaya">🌐 github.com/pablocelaya</a>
+          </div>
+        </div>
+      </div>
+      <!-- TABS -->
+      <div class="tabs">
+        <div class="tab active" id="tab-grid-btn" onclick="switchTab('grid')">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="7" height="7" rx="1" />
+            <rect x="14" y="3" width="7" height="7" rx="1" />
+            <rect x="3" y="14" width="7" height="7" rx="1" />
+            <rect x="14" y="14" width="7" height="7" rx="1" />
+          </svg>
+        </div>
+        <div class="tab" id="tab-feed-btn" onclick="switchTab('feed')">
+          <svg viewBox="0 0 24 24">
+            <rect x="3" y="3" width="18" height="4" rx="1" />
+            <rect x="3" y="10" width="18" height="4" rx="1" />
+            <rect x="3" y="17" width="18" height="4" rx="1" />
+          </svg>
+        </div>
+      </div>
+      <!-- GRID TAB -->
+      <div id="tab-grid" class="active-tab">
+        <div class="grid">
+          <!-- 0: Landing (Top/Newest) -->
+          <div class="grid-item" onclick="openIGModal(0)">
+            <div class="grid-thumb"><img src="Carrusel IG/Landing page para arquitecta/23.png" loading="lazy"></div>
+            <div class="grid-item-icon carousel-icon"></div>
+            <div class="grid-overlay"><span>❤️ 178</span></div>
+          </div>
+          <!-- 1: San Valentín -->
+          <div class="grid-item" onclick="openIGModal(1)">
+            <div class="grid-thumb"><img src="Carrusel IG/Regalo digital de San valentin/12.png" loading="lazy"></div>
+            <div class="grid-overlay"><span>❤️ 310</span></div>
+          </div>
+          <!-- 2: Vinos Bodega (Venta) -->
+          <div class="grid-item" onclick="openIGModal(2)">
+            <div class="grid-thumb"><img src="Carrusel IG/Desarrollo de sistema para venta de vinos/19.png"
+                loading="lazy"></div>
+            <div class="grid-item-icon carousel-icon"></div>
+            <div class="grid-overlay"><span>❤️ 124</span></div>
+          </div>
+          <!-- 3: Piattelli (Gestión) -->
+          <div class="grid-item" onclick="openIGModal(3)">
+            <div class="grid-thumb"><img src="Carrusel IG/Bodega Piatelli/16.png" loading="lazy"></div>
+            <div class="grid-item-icon carousel-icon"></div>
+            <div class="grid-overlay"><span>❤️ 340</span></div>
+          </div>
+          <!-- 4: Calculadora de Raíces -->
+          <div class="grid-item" onclick="openIGModal(4)">
+            <div class="grid-thumb"><img src="Carrusel IG/Calculos de raices - Analisis numerico/11.png" loading="lazy">
+            </div>
+            <div class="grid-overlay"><span>❤️ 89</span></div>
+          </div>
+          <!-- 5: Veteranos de Malvinas -->
+          <div class="grid-item" onclick="openIGModal(5)">
+            <div class="grid-thumb"><img src="Carrusel IG/Entrevista a veteranos de malvinas/4.png" loading="lazy">
+            </div>
+            <div class="grid-overlay"><span>❤️ 412</span></div>
+          </div>
+          <!-- 6: Cafetería -->
+          <div class="grid-item" onclick="openIGModal(6)">
+            <div class="grid-thumb"><img src="Carrusel IG/Cafeteria - gestion de mesas en tiempo real/18.png"
+                loading="lazy"></div>
+            <div class="grid-overlay"><span>❤️ 152</span></div>
+          </div>
+          <!-- 7: Plotter Wizard (Cotizador) -->
+          <div class="grid-item" onclick="openIGModal(7)">
+            <div class="grid-thumb"><img src="Carrusel IG/Cotizador de planos/5.png" loading="lazy"></div>
+            <div class="grid-item-icon carousel-icon"></div>
+            <div class="grid-overlay"><span>❤️ 198</span></div>
+          </div>
+          <!-- 8: Reality Plus -->
+          <div class="grid-item" onclick="openIGModal(8)">
+            <div class="grid-thumb"><img
+                src="Carrusel IG/Competencia Innovar - Aplicacion para maquetas de arquitectura/7.png" loading="lazy">
+            </div>
+            <div class="grid-item-icon carousel-icon"></div>
+            <div class="grid-overlay"><span>❤️ 521</span></div>
+          </div>
+          <!-- 9: My Garden (Bottom/Oldest) -->
+          <div class="grid-item" onclick="openIGModal(9)">
+            <div class="grid-thumb"><img src="Carrusel IG/My garden/1.png" loading="lazy"></div>
+            <div class="grid-item-icon carousel-icon"></div>
+            <div class="grid-overlay"><span>❤️ 214</span></div>
+          </div>
+        </div>
+      </div>
+
+      <!-- FEED TAB -->
+      <div id="tab-feed"></div>
+
+      <!-- MODERN IG DESKTOP MODAL -->
+      <div id="ig-modal" class="ig-modal-overlay" onclick="closeIGModal(event)">
+        <div class="ig-modal-content" onclick="event.stopPropagation()">
+          <button class="ig-modal-close" onclick="closeIGModal()">✕</button>
+          <div class="ig-modal-left">
+            <div class="modal-carousel-track" id="modal-track"></div>
+            <button class="modal-nav prev" id="modal-prev" onclick="changeModalSlide(-1)">❮</button>
+            <button class="modal-nav next" id="modal-next" onclick="changeModalSlide(1)">❯</button>
+            <div class="modal-counter" id="modal-counter">1 / 1</div>
+          </div>
+          <div class="ig-modal-right">
+            <div class="modal-right-header">
+              <img src="iconos/user.png" class="modal-av">
+              <div class="modal-user-info">
+                <span class="modal-username">pablocelaya</span>
+                <span class="modal-location" id="modal-location">Salta, Argentina</span>
+              </div>
+              <button class="modal-more">•••</button>
+            </div>
+            <div class="modal-right-body">
+              <div class="modal-caption-wrap">
+                <img src="iconos/user.png" class="modal-av">
+                <div>
+                  <span class="modal-username">pablocelaya</span>
+                  <span id="modal-caption">Cargando...</span>
+                  <div class="modal-hashtags">#ingenieria #pablocelaya #tecnologia #argentina</div>
+                </div>
+              </div>
+              <div class="fake-comment"><span class="modal-username">google</span> ¡Flama total! 🔥</div>
+              <div class="fake-comment"><span class="modal-username">microsoft</span> Durísimo el backend bro 💻</div>
+              <div class="fake-comment"><span class="modal-username">apple</span> Qué bacanería de diseño ✨</div>
+              <div class="fake-comment"><span class="modal-username">meta</span> Masivo ese despliegue 🚀</div>
+              <div class="fake-comment"><span class="modal-username">nvidia</span> FPS al máximo, qué flow 💎</div>
+            </div>
+            <div class="modal-right-footer">
+              <div class="modal-actions">
+                <div class="actions-left">
+                  <svg viewBox="0 0 24 24">
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"
+                      fill="currentColor" />
+                  </svg>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z" fill="none" stroke="currentColor"
+                      stroke-width="2" />
+                  </svg>
+                  <svg viewBox="0 0 24 24">
+                    <path d="M22 2L11 13M22 2l-7 20-4-9-9-4 20-7z" fill="none" stroke="currentColor" stroke-width="2" />
+                  </svg>
+                </div>
+                <svg viewBox="0 0 24 24">
+                  <path d="M19 21l-7-5-7 5V5a2 2 0 012-2h10a2 2 0 012 2z" fill="none" stroke="currentColor"
+                    stroke-width="2" />
+                </svg>
+              </div>
+              <div class="modal-likes-count">Le gusta a <b>maria_obando__</b> y <b>34 personas más</b></div>
+              <div class="modal-date">HACE 2 DÍAS</div>
+              <div class="modal-add-comment">
+                <span>😀</span>
+                <input type="text" placeholder="Agregá un comentario...">
+                <button>Publicar</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TAREAS -->
+  <div class="window" id="win-edu" style="padding:0; overflow:hidden;">
+    <div class="tm-root" style="width:100%; height:100%; border:none; border-radius:0;">
+      <!-- TITLE BAR -->
+      <div class="tm-titlebar" onmousedown="startDrag(event,'win-edu')">
+        <img src="iconos/admtareas.png" class="tm-titlebar-icon">
+        <span class="tm-titlebar-title">Administrador de tareas — Educación</span>
+        <div class="tm-winbtns">
+          <button class="tm-wbtn" onclick="minimizeWindow('win-edu')">—</button>
+          <button class="tm-wbtn" onclick="maximizeWindow('win-edu')">⬜</button>
+          <button class="tm-wbtn close" onclick="closeWindow('win-edu')">✕</button>
+        </div>
+      </div>
+
+      <!-- SEARCH -->
+      <div class="tm-search">
+        <div class="tm-search-inner">
+          <span>🔍</span>
+          <span>Busca por institución, curso o año</span>
+        </div>
+      </div>
+
+      <div class="tm-body">
+        <!-- SIDEBAR -->
+        <div class="tm-sidebar">
+          <div class="tm-nav-item active">📚 Educación</div>
+          <div class="tm-nav-item">📈 Rendimiento</div>
+          <div class="tm-nav-item">📜 Certificaciones</div>
+          <div class="tm-nav-item">🚀 Proyectos</div>
+          <div class="tm-nav-item"><img src="iconos/user.png"
+              style="width: 14px; height: 14px; border-radius: 50%; object-fit: cover;"> Perfil</div>
+          <div class="tm-nav-item">⚙️ Configuración</div>
+        </div>
+
+        <!-- MAIN -->
+        <div class="tm-main">
+          <!-- TOOLBAR -->
+          <div class="tm-toolbar">
+            <span class="tm-toolbar-title">Educación</span>
+            <div class="tm-toolbar-actions">
+              <button class="tm-tbtn">📄 Ver CV</button>
+              <button class="tm-tbtn">🔗 LinkedIn</button>
+              <button class="tm-tbtn" style="color:#ccc88a;border-color:#4a4020;">⭐ Destacar</button>
+              <button class="tm-tbtn">•••</button>
+            </div>
+          </div>
+
+          <!-- TABLE HEADER -->
+          <div class="tm-table-header">
+            <span>Nombre</span>
+            <span>Estado</span>
+            <span>Año</span>
+            <span>Promedio</span>
+            <span>Progreso</span>
+          </div>
+
+          <!-- TABLE CONTENT -->
+          <div class="tm-content">
+            <!-- UNIVERSIDAD -->
+            <div class="tm-section-header">
+              <span class="expand-arrow">▼</span>
+              Formación académica (2)
+            </div>
+
+            <div class="tm-row selected" onclick="toggleSub('sub-uni', this)">
+              <div class="tm-cell-name">
+                <span class="expand-arrow">▶</span>
+                <div class="tm-icon" style="background:#0f3460;">🎓</div>
+                <span>Ingeniería en Informática — UCASAL</span>
+              </div>
+              <div class="tm-cell-status"><span class="status-badge badge-running">En curso</span></div>
+              <div class="tm-cell-val" style="color:#aaa;">2023 – hoy</div>
+              <div class="tm-cell-val" style="color:#6db86d;">8,13 / 10</div>
+              <div class="bar-cell">
+                <div class="bar-wrap">
+                  <div class="mini-bar">
+                    <div class="mini-bar-fill" style="width:55%;background:#0078d4;"></div>
+                  </div>
+                  <span class="bar-num" style="color:#0078d4;">55%</span>
+                </div>
+              </div>
+            </div>
+            <div id="sub-uni" style="display:none;">
+              <div class="sub-row"><span>· Algoritmos y Estructuras de Datos</span><span></span><span
+                  style="text-align:right">2023</span><span
+                  style="text-align:right;color:#6db86d;">✓</span><span></span></div>
+              <div class="sub-row"><span>· Programación Orientada a Objetos</span><span></span><span
+                  style="text-align:right">2023</span><span
+                  style="text-align:right;color:#6db86d;">✓</span><span></span></div>
+              <div class="sub-row"><span>· Bases de Datos</span><span></span><span
+                  style="text-align:right">2024</span><span
+                  style="text-align:right;color:#6db86d;">✓</span><span></span></div>
+              <div class="sub-row"><span>· Análisis de Sistemas</span><span></span><span
+                  style="text-align:right">2024</span><span
+                  style="text-align:right;color:#6db86d;">✓</span><span></span></div>
+              <div class="sub-row"><span>· Redes y Comunicaciones</span><span></span><span
+                  style="text-align:right">2025</span><span style="text-align:right;color:#aaa;">En
+                  curso</span><span></span></div>
+            </div>
+
+            <!-- TÉCNICO -->
+            <div class="tm-section-header" style="margin-top:4px;">
+              <span class="expand-arrow">▼</span>
+              Formación técnica (1)
+            </div>
+            <div class="tm-row" onclick="toggleSub('sub-tec', this)">
+              <div class="tm-cell-name">
+                <span class="expand-arrow">▶</span>
+                <div class="tm-icon" style="background:#1a2a00;">🔧</div>
+                <span>Técnico en Informática — E.E.T. N°3139 Gral. M.M. De Güemes</span>
+              </div>
+              <div class="tm-cell-status"><span class="status-badge badge-done">Completo</span></div>
+              <div class="tm-cell-val" style="color:#aaa;">2017 – 2022</div>
+              <div class="tm-cell-val" style="color:#6aadda;">9,47 / 10</div>
+              <div class="bar-cell">
+                <div class="bar-wrap">
+                  <div class="mini-bar">
+                    <div class="mini-bar-fill" style="width:100%;background:#6aadda;"></div>
+                  </div>
+                  <span class="bar-num" style="color:#6aadda;">100%</span>
+                </div>
+              </div>
+            </div>
+            <div id="sub-tec" style="display:none;">
+              <div class="sub-row"><span>· Informática profesional y personal</span><span></span><span
+                  style="text-align:right">2017–2022</span><span
+                  style="text-align:right;color:#6db86d;">✓</span><span></span></div>
+              <div class="sub-row"><span>· Prácticas profesionalizantes (redes LAN, hardware)</span><span></span><span
+                  style="text-align:right">2022</span><span
+                  style="text-align:right;color:#6db86d;">✓</span><span></span></div>
+            </div>
+
+            <!-- CERTIFICACIONES -->
+            <div class="tm-section-header" style="margin-top:4px;">
+              <span class="expand-arrow">▼</span>
+              Certificaciones (4)
+            </div>
+
+            <div class="tm-row" onclick="toggleSub('sub-ai', this)">
+              <div class="tm-cell-name">
+                <span class="expand-arrow">▶</span>
+                <div class="tm-icon" style="background:#1a0030;">🤖</div>
+                <span>Desarrollo con IA — BIG school</span>
+              </div>
+              <div class="tm-cell-status"><span class="status-badge badge-done">Completo</span></div>
+              <div class="tm-cell-val" style="color:#aaa;">mar. 2026</div>
+              <div class="tm-cell-val" style="color:#6aadda;">Oficial</div>
+              <div class="bar-cell">
+                <div class="bar-wrap">
+                  <div class="mini-bar">
+                    <div class="mini-bar-fill" style="width:100%;background:#6aadda;"></div>
+                  </div><span class="bar-num" style="color:#6aadda;">100%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="tm-row" onclick="toggleSub('sub-pbi', this)">
+              <div class="tm-cell-name">
+                <span class="expand-arrow">▶</span>
+                <div class="tm-icon" style="background:#0a1a2a;">📊</div>
+                <span>Power BI — Santander Open Academy</span>
+              </div>
+              <div class="tm-cell-status"><span class="status-badge badge-done">Completo</span></div>
+              <div class="tm-cell-val" style="color:#aaa;">mar. 2026</div>
+              <div class="tm-cell-val" style="color:#6aadda;">OA-2026-...786</div>
+              <div class="bar-cell">
+                <div class="bar-wrap">
+                  <div class="mini-bar">
+                    <div class="mini-bar-fill" style="width:100%;background:#6aadda;"></div>
+                  </div><span class="bar-num" style="color:#6aadda;">100%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="tm-row" onclick="toggleSub('sub-neg', this)">
+              <div class="tm-cell-name">
+                <span class="expand-arrow">▶</span>
+                <div class="tm-icon" style="background:#002010;">🤝</div>
+                <span>Negociación — Santander Open Academy</span>
+              </div>
+              <div class="tm-cell-status"><span class="status-badge badge-done">Completo</span></div>
+              <div class="tm-cell-val" style="color:#aaa;">jun. 2024</div>
+              <div class="tm-cell-val" style="color:#6aadda;">OA-2024-...558</div>
+              <div class="bar-cell">
+                <div class="bar-wrap">
+                  <div class="mini-bar">
+                    <div class="mini-bar-fill" style="width:100%;background:#6aadda;"></div>
+                  </div><span class="bar-num" style="color:#6aadda;">100%</span>
+                </div>
+              </div>
+            </div>
+
+            <div class="tm-row" onclick="toggleSub('sub-esc', this)">
+              <div class="tm-cell-name">
+                <span class="expand-arrow">▶</span>
+                <div class="tm-icon" style="background:#1a1a00;">✍️</div>
+                <span>Escritura efectiva y persuasiva — Santander Open Academy</span>
+              </div>
+              <div class="tm-cell-status"><span class="status-badge badge-done">Completo</span></div>
+              <div class="tm-cell-val" style="color:#aaa;">jun. 2024</div>
+              <div class="tm-cell-val" style="color:#6aadda;">OA-2024-...477</div>
+              <div class="bar-cell">
+                <div class="bar-wrap">
+                  <div class="mini-bar">
+                    <div class="mini-bar-fill" style="width:60%;background:#d4a017;"></div>
+                  </div>
+                  <span class="bar-num" style="color:#d4a017;">60%</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- TERMINAL -->
+  <div class="window" id="win-terminal">
+    <div class="titlebar" onmousedown="startDrag(event,'win-terminal')" style="background:rgba(0,0,0,0.6)">
+      <img src="iconos/cmd.png" alt="cmd" class="titlebar-icon"
+        style="width: 16px; height: 16px; object-fit: cover; border-radius: 4px;">
+      <span class="titlebar-title" style="color:#6edc9f">pablo@portfolio:~</span>
+      <button class="winbtn" onclick="minimizeWindow('win-terminal')">—</button>
+      <button class="winbtn" onclick="maximizeWindow('win-terminal')">⬜</button>
+      <button class="winbtn close" onclick="closeWindow('win-terminal')">✕</button>
+    </div>
+    <div class="window-body">
+      <div class="terminal-body" id="terminal-body">
+        <div class="term-line"><span class="term-success">Bienvenido al entorno interactivo de Pablo Celaya [v2.0.4]</span></div>
+        <div class="term-line"><span class="term-out">Escribe <span class="term-accent">ayuda</span> para listar los comandos disponibles.</span></div>
+        <div class="term-line">&nbsp;</div>
+        <div id="term-output"></div>
+        <div id="term-input-line">
+          <span class="term-prompt">pablo</span><span class="term-out">@</span><span
+            class="term-path">portfolio</span><span class="term-out">:~$ </span>
+          <input id="term-input" type="text" autocomplete="off" autofocus spellcheck="false"
+            onkeydown="handleTermInput(event)">
+          <span class="term-cursor"></span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="window" id="win-wa">
+    <div class="titlebar" onmousedown="startDrag(event,'win-wa')" style="background:#075E54">
+      <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" class="titlebar-icon" style="width:16px;height:16px;">
+      <span class="titlebar-title">WhatsApp — Pablo Nicolás</span>
+      <button class="winbtn" onclick="minimizeWindow('win-wa')">—</button>
+      <button class="winbtn" onclick="maximizeWindow('win-wa')">□</button>
+      <button class="winbtn close" onclick="closeWindow('win-wa')">✕</button>
+    </div>
+    <div class="window-body" style="overflow:hidden;">
+      <div class="wa-body">
+         <div class="wa-header">
+            <div class="wa-avatar"><img src="iconos/user.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
+            <div class="wa-info">
+               <div class="wa-name">Pablo Celaya</div>
+               <div class="wa-status">En línea</div>
+            </div>
+         </div>
+         <div class="wa-chat-area" id="wa-chat-messages">
+            <div class="wa-msg wa-msg-received">
+               ¡Hola! 👋 Soy Pablo. ¿En qué puedo ayudarte en tu próximo proyecto técnico?
+               <span class="wa-time">10:00</span>
+            </div>
+         </div>
+         <div class="wa-input-area">
+            <input type="text" class="wa-input" id="wa-input-text" placeholder="Escribe un mensaje..." onkeydown="if(event.key==='Enter') sendWAMessage()">
+            <button class="wa-send" onclick="sendWAMessage()">➤</button>
+         </div>
+      </div>
+    </div>
+  </div>
+
+
+  <!-- TASKBAR -->
+  <div id="taskbar">
+    <div id="taskbar-left">
+      <div class="weather-widget"
+        style="display: flex; align-items: center; gap: 8px; padding: 4px 8px; border-radius: 6px; cursor: pointer; transition: background 0.15s;"
+        onmouseover="this.style.background='rgba(255,255,255,0.1)'" onmouseout="this.style.background='transparent'">
+        <img src="iconos/clima.png" alt="Clima" style="width: 24px; height: 24px; object-fit: contain;">
+        <div style="display: flex; flex-direction: column; text-align: left; line-height: 1.2;">
+          <span style="font-size: 13px; font-weight: 600; color: var(--text);">100&deg;</span>
+          <span style="font-size: 11px; color: var(--text-dim);">¡Fuego en prod!</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="taskbar-item" id="btn-start" onclick="toggleStartMenu()">
+      <img src="iconos/logo.webp" alt="Start" style="width: 24px; height: 24px; object-fit: contain;">
+    </div>
+    <div class="taskbar-item" onclick="openWindow('win-about')">
+      <img src="iconos/user.png" style="width: 24px; height: 24px; border-radius: 50%; object-fit: cover;">
+      <div class="tooltip">Sobre Mí</div>
+    </div>
+    <div class="taskbar-item" onclick="openWindow('win-skills')">
+      <span>⚙️</span>
+      <div class="tooltip">Skills</div>
+    </div>
+
+    <div class="taskbar-item" onclick="window.open('https://www.instagram.com/panick_sa/','_blank')">
+      <img src="iconos/Instagram-Logo-2016.png" style="width: 36px; height: 36px; object-fit: contain;">
+      <div class="tooltip">Instagram @panick_sa</div>
+    </div>
+    <div class="taskbar-item" onclick="openWindow('win-edu')">
+      <img src="iconos/admtareas.png" alt="Tareas" style="width: 36px; height: 36px; object-fit: contain;">
+      <div class="tooltip">Tareas</div>
+    </div>
+    <div class="taskbar-item" onclick="openWindow('win-terminal')">
+      <img src="iconos/cmd.png" alt="cmd" style="width: 24px; height: 24px; object-fit: cover; border-radius: 6px;">
+      <div class="tooltip">Terminal</div>
+    </div>
+
+    <div id="taskbar-right">
+      <img src="iconos/sonido.png" alt="Sonido"
+        style="width: 14px; height: 14px; object-fit: contain; opacity: 0.85; cursor: pointer;">
+      <img src="iconos/wifi.png" alt="WiFi"
+        style="width: 14px; height: 14px; object-fit: contain; opacity: 0.85; cursor: pointer;">
+      <div id="clock"></div>
+    </div>
+  </div>
+
+  <!-- START MENU -->
+  <div id="start-menu">
+    <input class="start-search" type="text" placeholder="🔍  Buscar apps, archivos y más..." id="start-search-input">
+    <div class="start-section-title">Aplicaciones ancladas</div>
+    <div class="start-apps">
+      <div class="start-app" onclick="openWindow('win-about');toggleStartMenu()">
+        <img src="iconos/user.png" class="sa-icon"
+          style="width: 32px; height: 32px; border-radius: 50%; object-fit: cover;">
+        <span>Sobre Mí</span>
+      </div>
+      <div class="start-app" onclick="openWindow('win-skills');toggleStartMenu()">
+        <span class="sa-icon">⚙️</span>
+        <span>Skills</span>
+      </div>
+      <div class="start-app" onclick="openWindow('win-exp');toggleStartMenu()">
+        <img src="iconos/Instagram-Logo-2016.png" class="sa-icon"
+          style="width: 32px; height: 32px; object-fit: contain;">
+        <span>Instagram</span>
+      </div>
+      <div class="start-app" onclick="openWindow('win-edu');toggleStartMenu()">
+        <img src="iconos/admtareas.png" alt="Tareas" style="width: 32px; height: 32px; object-fit: contain;">
+        <span>Tareas</span>
+      </div>
+      <div class="start-app" onclick="openWindow('win-terminal');toggleStartMenu()">
+        <img src="iconos/cmd.png" alt="cmd" style="width: 32px; height: 32px; object-fit: cover; border-radius: 8px;">
+        <span>Terminal</span>
+      </div>
+      <div class="start-app" onclick="openWindow('win-wa');toggleStartMenu()">
+        <img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg" alt="WA" style="width: 32px; height: 32px; object-fit: contain;">
+        <span>WhatsApp</span>
+      </div>
+    </div>
+    <div class="start-footer">
+      <div class="start-user">
+        <img src="iconos/user.png" class="su-av" style="border-radius: 50%; object-fit: cover; background: none;">
+        <span>Pablo Celaya</span>
+      </div>
+      <button class="start-power" title="Apagar">⏻</button>
+    </div>
+  </div>
+
+  <!-- CONTEXT MENU -->
+  <div class="ctx-menu" id="ctx-menu">
+    <div class="ctx-item" onclick="openAllWindows()">🗗 Abrir todo</div>
+    <div class="ctx-item" onclick="closeAllWindows()">✕ Cerrar todo</div>
+    <div class="ctx-sep"></div>
+    <div class="ctx-item" onclick="openWindow('win-about');hideCtx()"><img src="iconos/user.png"
+        style="width: 16px; height: 16px; border-radius: 50%; object-fit: cover;"> Sobre Mí</div>
+    <div class="ctx-item" onclick="openWindow('win-skills');hideCtx()">⚙️ Skills</div>
+    <div class="ctx-item" onclick="openWindow('win-exp');hideCtx()"><img src="iconos/Instagram-Logo-2016.png"
+        style="width: 16px; height: 16px; object-fit: contain;"> Instagram</div>
+    <div class="ctx-item" onclick="openWindow('win-edu');hideCtx()"><img src="iconos/admtareas.png"
+        style="width:16px; height:16px; object-fit: contain;"> Tareas</div>
+    <div class="ctx-item" onclick="openWindow('win-terminal');hideCtx()"><img src="iconos/cmd.png"
+        style="width:16px; height:16px; object-fit: cover; border-radius: 4px;"> Terminal</div>
+    <div class="ctx-item" onclick="openWindow('win-wa');hideCtx()"><img src="https://upload.wikimedia.org/wikipedia/commons/6/6b/WhatsApp.svg"
+        style="width:16px; height:16px; object-fit: contain;"> WhatsApp</div>
+  </div>
+
+  <!-- MONKEY ASSISTANT -->
+  <div id="monkey-assistant"
+    style="position: fixed; bottom: 70px; right: 20px; z-index: 9000; display: none; align-items: flex-end; gap: 15px;">
+    <div
+      style="background: white; border: 2px solid #222; border-radius: 12px; padding: 14px 18px; position: relative; max-width: 240px; box-shadow: 0 8px 25px rgba(0,0,0,0.6);">
+      <p
+        style="color: #8a0303; font-family: 'Creepster', cursive; font-size: 20px; letter-spacing: 1.5px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); margin: 0; line-height: 1.3;">
+        ¡Buenas! 🩸 HAZ DOBLE CLIC EN LOS ÍCONOS para navegar o investiga el menú de inicio ANTES DE QUE SEA TARDE...
+        👁️
+      </p>
+      <!-- Balloon Tail -->
+      <div
+        style="position: absolute; bottom: 20px; right: -14px; width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 14px solid #222;">
+      </div>
+      <div
+        style="position: absolute; bottom: 20px; right: -10px; width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 10px solid white;">
+      </div>
+    </div>
+    <div class="monkey-anim"></div>
+  </div>
+
+  <script>
+    function toggleSub(id, row) {
+      const sub = document.getElementById(id);
+      if (!sub) return;
+      const arrow = row.querySelector('.expand-arrow');
+      if (sub.style.display === 'none') {
+        sub.style.display = 'block';
+        if (arrow) arrow.textContent = '▼';
+      } else {
+        sub.style.display = 'none';
+        if (arrow) arrow.textContent = '▶';
+      }
+    }
+
+    // ===== CLOCK =====
+    function updateClock() {
+      const now = new Date();
+      const h = now.getHours().toString().padStart(2, '0');
+      const m = now.getMinutes().toString().padStart(2, '0');
+      const d = now.toLocaleDateString('es-AR', { day: '2-digit', month: '2-digit', year: 'numeric' });
+      document.getElementById('clock').innerHTML = `<b>${h}:${m}</b><br>${d}`;
+    }
+    updateClock();
+    setInterval(updateClock, 1000);
+
+    // ===== Z-INDEX MANAGER =====
+    let topZ = 200;
+    function bringToFront(id) {
+      document.getElementById(id).style.zIndex = ++topZ;
+    }
+
+    // ===== WINDOW MANAGEMENT =====
+    const positions = {
+      'win-about': { top: 60, left: 60 },
+      'win-skills': { top: 70, left: 560 },
+      'win-exp': { top: 90, left: 100 },
+      'win-edu': { top: 110, left: 700 },
+      'win-terminal': { top: 130, left: 400 },
+      'win-wa': { top: 150, left: 200 },
+    };
+
+    function openWindow(id) {
+      const w = document.getElementById(id);
+      if (!w.classList.contains('visible')) {
+        const pos = positions[id] || { top: 80, left: 80 };
+        w.style.top = pos.top + 'px';
+        w.style.left = pos.left + 'px';
+        w.classList.add('visible');
+      }
+      bringToFront(id);
+      updateTaskbarActive(id);
+    }
+
+    function closeWindow(id) {
+      document.getElementById(id).classList.remove('visible');
+    }
+
+    function minimizeWindow(id) {
+      document.getElementById(id).classList.remove('visible');
+    }
+
+    const windowMaxState = {};
+    function maximizeWindow(id) {
+      const w = document.getElementById(id);
+      if (windowMaxState[id]) {
+        Object.assign(w.style, windowMaxState[id]);
+        delete windowMaxState[id];
+      } else {
+        windowMaxState[id] = { top: w.style.top, left: w.style.left, width: w.style.width, height: w.style.height };
+        w.style.top = '0';
+        w.style.left = '0';
+        w.style.width = '100vw';
+        w.style.height = 'calc(100vh - 48px)';
+        w.style.borderRadius = '0';
+      }
+      bringToFront(id);
+    }
+
+    function sendWAMessage() {
+      const input = document.getElementById('wa-input-text');
+      const text = input.value.trim();
+      if (!text) return;
+      
+      const chat = document.getElementById('wa-chat-messages');
+      const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+      
+      const msgDiv = document.createElement('div');
+      msgDiv.className = 'wa-msg wa-msg-sent';
+      msgDiv.innerHTML = `${text} <span class="wa-time">${time}</span>`;
+      chat.appendChild(msgDiv);
+      chat.scrollTop = chat.scrollHeight;
+      
+      input.value = '';
+      
+      setTimeout(() => {
+        window.open(`https://wa.me/543875122693?text=${encodeURIComponent(text)}`, '_blank');
+      }, 500);
+    }
+
+    function openAllWindows() {
+      ['win-about', 'win-skills', 'win-exp', 'win-edu', 'win-terminal', 'win-wa'].forEach(id => openWindow(id));
+      hideCtx();
+    }
+
+    function closeAllWindows() {
+      ['win-about', 'win-skills', 'win-exp', 'win-edu', 'win-terminal', 'win-wa'].forEach(id => closeWindow(id));
+      hideCtx();
+    }
+
+    function updateTaskbarActive(id) { }
+
+    // ===== DRAG =====
+    let dragging = null, dragOffX = 0, dragOffY = 0;
+
+    function startDrag(e, id) {
+      if (e.target.classList.contains('winbtn')) return;
+      dragging = id;
+      const w = document.getElementById(id);
+      dragOffX = e.clientX - w.offsetLeft;
+      dragOffY = e.clientY - w.offsetTop;
+      bringToFront(id);
+      e.preventDefault();
+    }
+
+    document.addEventListener('mousemove', e => {
+      if (!dragging) return;
+      const w = document.getElementById(dragging);
+      const nx = Math.max(0, Math.min(window.innerWidth - w.offsetWidth, e.clientX - dragOffX));
+      const ny = Math.max(0, Math.min(window.innerHeight - 48 - 36, e.clientY - dragOffY));
+      w.style.left = nx + 'px';
+      w.style.top = ny + 'px';
+    });
+
+    document.addEventListener('mouseup', () => { dragging = null; });
+
+    // ===== START MENU =====
+    let startOpen = false;
+    function toggleStartMenu() {
+      const m = document.getElementById('start-menu');
+      startOpen = !startOpen;
+      m.classList.toggle('open', startOpen);
+      if (startOpen) setTimeout(() => document.getElementById('start-search-input').focus(), 100);
+    }
+
+    document.addEventListener('click', e => {
+      if (startOpen && !e.target.closest('#start-menu') && !e.target.closest('#btn-start')) {
+        startOpen = false;
+        document.getElementById('start-menu').classList.remove('open');
+      }
+    });
+
+    // ===== CONTEXT MENU =====
+    document.addEventListener('contextmenu', e => {
+      if (e.target.closest('.window') || e.target.closest('#taskbar')) return;
+      e.preventDefault();
+      const m = document.getElementById('ctx-menu');
+      m.style.left = Math.min(e.clientX, window.innerWidth - 200) + 'px';
+      m.style.top = Math.min(e.clientY, window.innerHeight - 300) + 'px';
+      m.classList.add('open');
+    });
+
+    document.addEventListener('click', e => {
+      if (!e.target.closest('#ctx-menu')) hideCtx();
+    });
+
+    function hideCtx() {
+      document.getElementById('ctx-menu').classList.remove('open');
+    }
+
+    // ===== TERMINAL =====
+    const termCommands = {
+      ayuda: () => `<div class="term-line"><span class="term-accent">Comandos disponibles:</span></div>
+    <div class="term-line">  <span class="term-success">bio</span>       — Perfil profesional y enfoque</div>
+    <div class="term-line">  <span class="term-success">dev</span>       — Proyectos actuales en desarrollo</div>
+    <div class="term-line">  <span class="term-success">contacto</span>  — Enlaces y redes profesionales</div>
+    <div class="term-line">  <span class="term-success">limpiar</span>   — Limpiar la consola</div>`,
+      help: () => termCommands.ayuda(),
+      bio: () => `<div class="term-line"><span class="term-accent">PERFIL PROFESIONAL</span></div>
+    <div class="term-line">Soy estudiante avanzado de Ingeniería en Informática, con una base sólida en desarrollo de software y un enfoque claro hacia la construcción de sistemas eficientes, escalables y fundamentalmente, bien diseñados. Me interesa entender no solo cómo programar, sino cómo funcionan los sistemas en su totalidad: desde la lógica de negocio hasta la arquitectura que los sostiene.</div>`,
+      dev: () => `<div class="term-line"><span class="term-accent">Proyectos Activos:</span></div>
+    <div class="term-line">1. <span class="term-success">ERP Asignación Docente</span> — Sistema complejo de gestión académica.</div>
+    <div class="term-line">2. <span class="term-success">Gestión Veterinaria</span> — Plataforma integral de administración.</div>`,
+      contacto: () => `<div class="term-line"><span class="term-accent">Conecta conmigo:</span></div>
+    <div class="term-line">📱 <a href="https://wa.me/543875122693" target="_blank" class="term-success" style="text-decoration:none">+54 387 512 2693 (WhatsApp)</a></div>
+    <div class="term-line">📧 <a href="mailto:pablocelayarios@gmail.com" class="term-success" style="text-decoration:none">pablocelayarios@gmail.com</a></div>
+    <div class="term-line">💼 <a href="https://linkedin.com/in/pablo-nicolas-celaya-rios-228322240" target="_blank" class="term-success" style="text-decoration:none">LinkedIn Profile</a></div>
+    <div class="term-line">🐙 <a href="https://github.com/pablocelaya" target="_blank" class="term-success" style="text-decoration:none">GitHub Repository</a></div>`,
+      contact: () => termCommands.contacto(),
+      '543875122693': () => { window.open('https://wa.me/543875122693', '_blank'); return '<div class="term-line term-success">Redireccionando a WhatsApp...</div>'; },
+      '3875122693': () => termCommands['543875122693'](),
+      limpiar: () => 'CLEAR',
+      clear: () => 'CLEAR',
+      cls: () => 'CLEAR',
+      ls: () => `<div class="term-line">cv.pdf  proyectos/  readme.md  social.lnk</div>`,
+      whoami: () => `<div class="term-line">Ingeniero en Informática en formación | Backend Dev | Systems Designer</div>`
+    };
+
+    // FIX 5: Monkey now lasts 14 seconds (4s extra) before fading out
+    setTimeout(() => {
+      const monkey = document.getElementById('monkey-assistant');
+      if (monkey) {
+        monkey.style.transition = 'opacity 1s ease-out, transform 1s ease-out';
+        monkey.style.opacity = '0';
+        monkey.style.transform = 'translateY(100px)';
+        setTimeout(() => monkey.remove(), 1000);
+      }
+    }, 14000);
+
+
+    function handleTermInput(e) {
+      if (e.key !== 'Enter') return;
+      const input = document.getElementById('term-input');
+      const cmd = input.value.trim().toLowerCase();
+      input.value = '';
+
+      const out = document.getElementById('term-output');
+      const line = document.createElement('div');
+      line.innerHTML = `<div class="term-line"><span class="term-prompt">pablo</span><span class="term-out">@</span><span class="term-path">portfolio</span><span class="term-out">:~$ </span><span class="term-cmd">${cmd}</span></div>`;
+      out.appendChild(line);
+
+      if (cmd === '') return;
+
+      const res = termCommands[cmd];
+      const resLine = document.createElement('div');
+      if (res) {
+        const result = res();
+        if (result === 'CLEAR') {
+          out.innerHTML = '';
+          return;
+        }
+        resLine.innerHTML = result;
+      } else {
+        resLine.innerHTML = `<div class="term-line"><span style="color:#fca5a5">comando no encontrado: '${cmd}' · Escribe <span style="color:#ffd966">ayuda</span> para ver opciones.</span></div>`;
+      }
+      out.appendChild(resLine);
+
+      const tb = document.getElementById('terminal-body');
+      tb.scrollTop = tb.scrollHeight;
+    }
+
+    window.addEventListener('load', () => {
+      // Show monkey assistant after delay
+      setTimeout(() => {
+        const monkey = document.getElementById('monkey-assistant');
+        const errSound = document.getElementById('error-sound');
+        if (monkey) {
+          monkey.style.display = 'flex';
+          monkey.style.animation = 'winOpen 0.5s ease-out forwards';
+        }
+        if (errSound) {
+          errSound.volume = 0.8;
+          errSound.play().catch(e => console.log('Error sound autoplay block', e));
+        }
+      }, 4500);
+
+      // Auto open about window
+      setTimeout(() => openWindow('win-about'), 400);
+    });
+
+    // Focus terminal input on click
+    document.getElementById('win-terminal').addEventListener('click', () => {
+      document.getElementById('term-input').focus();
+    });
+
+    // ==== INSTAGRAM APP JS LOGIC ====
+    function toggleLike(btn) {
+      btn.classList.toggle('liked');
+      const likesEl = btn.closest('.post').querySelector('.post-likes');
+      const cur = parseInt(likesEl.textContent);
+      likesEl.textContent = (btn.classList.contains('liked') ? cur + 1 : cur - 1) + ' me gusta';
+    }
+
+    // FIX 2: switchTab now correctly generates and shows the feed tab
+    function switchTab(tab) {
+      const gridBtn = document.getElementById('tab-grid-btn');
+      const feedBtn = document.getElementById('tab-feed-btn');
+      const gridTab = document.getElementById('tab-grid');
+      const feedTab = document.getElementById('tab-feed');
+
+      if (!gridBtn || !feedBtn || !gridTab || !feedTab) return;
+
+      if (tab === 'grid') {
+        gridBtn.classList.add('active');
+        feedBtn.classList.remove('active');
+        gridTab.classList.add('active-tab');
+        feedTab.classList.remove('active-tab');
+      } else {
+        // Generate feed on first access
+        if (feedTab.innerHTML.trim() === '') {
+          generateIGFeed();
+        }
+        gridBtn.classList.remove('active');
+        feedBtn.classList.add('active');
+        gridTab.classList.remove('active-tab');
+        feedTab.classList.add('active-tab');
+      }
+    }
+
+    function scrollToPost(idx) {
+      setTimeout(() => {
+        const el = document.getElementById('post-' + idx);
+        const win = document.querySelector('#win-exp .app');
+        if (el && win) {
+          win.scrollTo({ top: el.offsetTop - 55, behavior: 'smooth' });
+        }
+      }, 100);
+    }
+
+    // ── CAROUSEL INTERACTIVITY ──
+    const igState = {};
+
+    const IG_PROJECTS = [
+      {
+        title: "Estudio Arquitectura",
+        caption: "Landing page corporativa para estudio de arquitectura con portfolio interactivo. Diseño minimalista y moderno.",
+        location: "Salta, Argentina",
+        images: [
+          "Carrusel IG/Landing page para arquitecta/23.png",
+          "Carrusel IG/Landing page para arquitecta/24.png",
+          "Carrusel IG/Landing page para arquitecta/25.png"
+        ]
+      },
+      {
+        title: "San Valentín Digital",
+        caption: "Experiencia interactiva web creada como regalo personalizado de San Valentín. Un detalle digital único.",
+        location: "Regalo Especial",
+        images: ["Carrusel IG/Regalo digital de San valentin/12.png"]
+      },
+      {
+        title: "Venta de Vinos",
+        caption: "Sistema de e-commerce y gestión de stock para bodegas locales. Integración de catálogo y ventas.",
+        location: "Salta, Argentina",
+        images: [
+          "Carrusel IG/Desarrollo de sistema para venta de vinos/19.png",
+          "Carrusel IG/Desarrollo de sistema para venta de vinos/20.png",
+          "Carrusel IG/Desarrollo de sistema para venta de vinos/21.png",
+          "Carrusel IG/Desarrollo de sistema para venta de vinos/22.png"
+        ]
+      },
+      {
+        title: "Bodega Piattelli (2025)",
+        caption: "Desarrollo web con dashboard para la gestión eficiente de recursos y landingpage de catálogo de vinos para clientes.",
+        location: "Bodega Piattelli (2025)",
+        images: ["Carrusel IG/Bodega Piatelli/16.png", "Carrusel IG/Bodega Piatelli/17.png"]
+      },
+      {
+        title: "Análisis Numérico",
+        caption: "Software para cálculo de raíces y métodos numéricos avanzados para resolución de problemas matemáticos.",
+        location: "UCASAL",
+        images: ["Carrusel IG/Calculos de raices - Analisis numerico/11.png"]
+      },
+      {
+        title: "Entrevistas Malvinas",
+        caption: "Proyecto documental: Registro de entrevistas a veteranos de la Guerra de Malvinas. Nota: Este proyecto fue una práctica de cómo realizar entrevistas de manera profesional.",
+        location: "Salta, Argentina",
+        images: ["Carrusel IG/Entrevista a veteranos de malvinas/4.png"]
+      },
+      {
+        title: "Gestión Cafetería",
+        caption: "Sistema para gestión de mesas y pedidos en tiempo real para negocios gastronómicos eficientes.",
+        location: "Salta, Argentina",
+        images: ["Carrusel IG/Cafeteria - gestion de mesas en tiempo real/18.png"]
+      },
+      {
+        title: "Plotter Wizard (2023)",
+        caption: "Sistema en Python + OpenCV para cálculo automático de cotizaciones a partir de análisis de imagen. Optimización de presupuestos.",
+        location: "Plotter Wizard (2023)",
+        images: ["Carrusel IG/Cotizador de planos/5.png", "Carrusel IG/Cotizador de planos/6.png"]
+      },
+      {
+        title: "Reality Plus – Innovar 2022",
+        caption: "Aplicación de realidad aumentada desarrollada con Unity y Vuforia. Proyecto seleccionado entre los 50 mejores del país.",
+        location: "Reality Plus – Innovar 2022",
+        images: [
+          "Carrusel IG/Competencia Innovar - Aplicacion para maquetas de arquitectura/7.png",
+          "Carrusel IG/Competencia Innovar - Aplicacion para maquetas de arquitectura/8.png",
+          "Carrusel IG/Competencia Innovar - Aplicacion para maquetas de arquitectura/9.png",
+          "Carrusel IG/Competencia Innovar - Aplicacion para maquetas de arquitectura/10.png"
+        ]
+      },
+      {
+        title: "My Garden (2021)",
+        caption: "Sistema de automatización con Arduino para riego e iluminación inteligente (–20 % consumo de agua). Uso de tinkercad como laboratorio y diseño de piezas en sketchup para prototipado con impresión 3D.",
+        location: "My Garden (2021)",
+        images: ["Carrusel IG/My garden/1.png", "Carrusel IG/My garden/2.png", "Carrusel IG/My garden/3.png"]
+      }
+    ];
+
+    let currentModalProject = null;
+    let currentModalSlide = 0;
+
+    // FIX 3 & 4: openIGModal scrolls modal to top and opens Feed tab if window minimized
+    function openIGModal(index) {
+      const project = IG_PROJECTS[index];
+      if (!project) return;
+
+      const winExp = document.getElementById('win-exp');
+
+      // FIX 4: If window is not visible (minimized/closed), open it and switch to feed tab
+      if (!winExp.classList.contains('visible')) {
+        openWindow('win-exp');
+        // Switch to feed tab and scroll to the post
+        switchTab('feed');
+        setTimeout(() => {
+          const target = document.getElementById(`post-${index}`);
+          const app = document.getElementById('ig-app');
+          if (target && app) {
+            app.scrollTo({ top: target.offsetTop - 55, behavior: 'smooth' });
+          }
+        }, 150);
+        return;
+      }
+
+      currentModalProject = project;
+      currentModalSlide = 0;
+
+      // Fill text data
+      document.getElementById('modal-caption').innerText = project.caption;
+      document.getElementById('modal-location').innerText = project.location;
+
+      // Fill images
+      const track = document.getElementById('modal-track');
+      track.innerHTML = project.images.map(img => `<img src="${img}" loading="lazy">`).join('');
+
+      updateModalCarousel();
+
+      // FIX 3: Scroll the modal overlay to the top before showing it,
+      // so the modal content is always visible at the top of the window
+      const overlay = document.getElementById('ig-modal');
+      overlay.scrollTop = 0;
+
+      // Also scroll the app container to top so overlay (which is absolute) starts from visible area
+      const app = document.getElementById('ig-app');
+      if (app) app.scrollTop = 0;
+
+      overlay.classList.add('open');
+    }
+
+    function closeIGModal(e) {
+      document.getElementById('ig-modal').classList.remove('open');
+    }
+
+    function changeModalSlide(dir) {
+      if (!currentModalProject) return;
+      const total = currentModalProject.images.length;
+      currentModalSlide = (currentModalSlide + dir + total) % total;
+      updateModalCarousel();
+    }
+
+    function updateModalCarousel() {
+      const track = document.getElementById('modal-track');
+      const count = document.getElementById('modal-counter');
+      const total = currentModalProject.images.length;
+
+      track.style.transform = `translateX(-${currentModalSlide * 100}%)`;
+      count.innerText = `${currentModalSlide + 1} / ${total}`;
+
+      document.getElementById('modal-prev').style.display = total > 1 ? 'flex' : 'none';
+      document.getElementById('modal-next').style.display = total > 1 ? 'flex' : 'none';
+      count.style.display = total > 1 ? 'block' : 'none';
+    }
+
+    function generateIGFeed() {
+      const feedTab = document.getElementById('tab-feed');
+      feedTab.innerHTML = IG_PROJECTS.map((p, i) => `
+    <div class="post" id="post-${i}">
+      <div class="post-header">
+        <div class="post-av"><img src="iconos/user.png" style="width:100%;height:100%;border-radius:50%;object-fit:cover;"></div>
+        <div class="post-meta">
+          <div class="post-user">pablocelaya <span class="verified">✦</span></div>
+          <div class="post-location">${p.location}</div>
+        </div>
+      </div>
+      <div class="carousel-wrap" id="feed-c-${i}">
+        <div class="carousel-track" id="feed-track-${i}">
+          ${p.images.map(img => `<div class="carousel-slide" style="padding:0;"><img src="${img}" style="width:100%;height:100%;object-fit:contain;"></div>`).join('')}
+        </div>
+        ${p.images.length > 1 ? `
+          <button class="carousel-btn prev" onclick="feedSlide(${i}, -1)">❮</button>
+          <button class="carousel-btn next" onclick="feedSlide(${i}, 1)">❯</button>
+          <div class="slide-counter" id="feed-counter-${i}" style="position:absolute;bottom:15px;right:15px;background:rgba(0,0,0,0.6);color:white;padding:4px 10px;border-radius:20px;font-size:12px;">1 / ${p.images.length}</div>
+        ` : ''}
+      </div>
+      <div class="post-actions">
+        <button class="action-btn" onclick="toggleLikeFeed(this)">
+          <svg viewBox="0 0 24 24"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" fill="currentColor"/></svg>
+        </button>
+      </div>
+      <div class="post-likes" id="feed-likes-${i}">34 me gusta</div>
+      <div class="post-caption"><span class="username">pablocelaya</span> ${p.caption}</div>
+      <div class="post-time">hace 2 días</div>
+    </div>
+  `).join('');
+    }
+
+    // Global state for feed carousels
+    const feedCarouselState = {};
+
+    function feedSlide(index, dir) {
+      if (feedCarouselState[index] === undefined) feedCarouselState[index] = 0;
+      const project = IG_PROJECTS[index];
+      const total = project.images.length;
+      feedCarouselState[index] = (feedCarouselState[index] + dir + total) % total;
+
+      const track = document.getElementById(`feed-track-${index}`);
+      const counter = document.getElementById(`feed-counter-${index}`);
+
+      if (track) track.style.transform = `translateX(-${feedCarouselState[index] * 100}%)`;
+      if (counter) counter.innerText = `${feedCarouselState[index] + 1} / ${total}`;
+    }
+
+    function toggleLikeFeed(btn) {
+      btn.classList.toggle('liked');
+      const post = btn.closest('.post');
+      const idx = post.id.replace('post-', '');
+      const likesEl = document.getElementById(`feed-likes-${idx}`);
+      if (!likesEl) return;
+      const cur = parseInt(likesEl.textContent);
+      likesEl.textContent = (btn.classList.contains('liked') ? cur + 1 : cur - 1) + ' me gusta';
+    }
+
+    window.addEventListener('load', () => { });
+
+  </script>
+</body>
+
+</html>

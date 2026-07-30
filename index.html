@@ -1240,36 +1240,6 @@
       margin: 4px 0;
     }
 
-    /* MONKEY ASSISTANT */
-    .monkey-anim {
-      width: 180px;
-      height: 180px;
-      background-image: url('iconos/mono1.png');
-      background-size: contain;
-      background-repeat: no-repeat;
-      background-position: bottom center;
-      animation: monkeyBlink 1s infinite alternate;
-      cursor: pointer;
-      filter: drop-shadow(0 4px 10px rgba(0, 0, 0, 0.6));
-      transition: transform 0.2s;
-    }
-
-    .monkey-anim:hover {
-      transform: scale(1.1);
-    }
-
-    @keyframes monkeyBlink {
-
-      0%,
-      49.9% {
-        background-image: url('iconos/mono1.png');
-      }
-
-      50%,
-      100% {
-        background-image: url('iconos/mono2.png');
-      }
-    }
     /* CODE EDITOR STYLE FOR ABOUT */
     #win-about {
       width: 480px;
@@ -1456,7 +1426,6 @@
 <body>
 
   <audio id="startup-sound" src="Windows 11 Startup sound.mp3" preload="auto" autoplay></audio>
-  <audio id="error-sound" src="Efecto error computadora.mp3" preload="auto"></audio>
   <script>
     (function () {
       const audio = document.getElementById('startup-sound');
@@ -2093,7 +2062,7 @@
 
       #win-exp .ig-modal-left {
         flex: 1;
-        background: #000;
+        background: #fff;
         display: flex;
         align-items: center;
         justify-content: center;
@@ -2118,9 +2087,12 @@
       }
 
       #win-exp .modal-carousel-track img {
+        display: block;
         min-width: 100%;
         height: 100%;
         object-fit: contain;
+        flex-shrink: 0;
+        cursor: zoom-in;
       }
 
       #win-exp .modal-nav {
@@ -2421,7 +2393,7 @@
         position: relative;
         overflow: hidden;
         background: var(--surface);
-        aspect-ratio: 1;
+        aspect-ratio: 4 / 5;
         width: 100%;
       }
 
@@ -2435,13 +2407,16 @@
         flex-shrink: 0;
         width: 100%;
         height: 100%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        flex-direction: column;
-        gap: 12px;
-        padding: 24px;
+        padding: 0;
         position: relative;
+        overflow: hidden;
+      }
+
+      #win-exp .carousel-slide img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
       }
 
       #win-exp .slide-bg-1 {
@@ -2870,64 +2845,81 @@
       <!-- GRID TAB -->
       <div id="tab-grid" class="active-tab">
         <div class="grid">
-          <!-- 0: Landing (Top/Newest) -->
+          <!-- 0: HogarOrden -->
           <div class="grid-item" onclick="openIGModal(0)">
+            <div class="grid-thumb"><img src="Carrusel IG/HogarOrden/1.png" loading="lazy"></div>
+            <div class="grid-item-icon carousel-icon"></div>
+            <div class="grid-overlay"><span>❤️ 320</span></div>
+          </div>
+          <!-- 1: MIKIT -->
+          <div class="grid-item" onclick="openIGModal(1)">
+            <div class="grid-thumb"><img src="Carrusel IG/MIKIT/1.png" loading="lazy"></div>
+            <div class="grid-item-icon carousel-icon"></div>
+            <div class="grid-overlay"><span>❤️ 280</span></div>
+          </div>
+          <!-- 2: SAD - Sistema de Asignación Docente -->
+          <div class="grid-item" onclick="openIGModal(2)">
+            <div class="grid-thumb"><img src="Carrusel IG/Sistema de asignacion docente/1.png" loading="lazy"></div>
+            <div class="grid-overlay"><span>❤️ 156</span></div>
+          </div>
+          <!-- 3: Landing Arquitectura -->
+          <div class="grid-item" onclick="openIGModal(3)">
             <div class="grid-thumb"><img src="Carrusel IG/Landing page para arquitecta/23.png" loading="lazy"></div>
             <div class="grid-item-icon carousel-icon"></div>
             <div class="grid-overlay"><span>❤️ 178</span></div>
           </div>
-          <!-- 1: San Valentín -->
-          <div class="grid-item" onclick="openIGModal(1)">
+          <!-- 4: San Valentín -->
+          <div class="grid-item" onclick="openIGModal(4)">
             <div class="grid-thumb"><img src="Carrusel IG/Regalo digital de San valentin/12.png" loading="lazy"></div>
             <div class="grid-overlay"><span>❤️ 310</span></div>
           </div>
-          <!-- 2: Vinos Bodega (Venta) -->
-          <div class="grid-item" onclick="openIGModal(2)">
+          <!-- 5: Vinos Bodega -->
+          <div class="grid-item" onclick="openIGModal(5)">
             <div class="grid-thumb"><img src="Carrusel IG/Desarrollo de sistema para venta de vinos/19.png"
                 loading="lazy"></div>
             <div class="grid-item-icon carousel-icon"></div>
             <div class="grid-overlay"><span>❤️ 124</span></div>
           </div>
-          <!-- 3: Piattelli (Gestión) -->
-          <div class="grid-item" onclick="openIGModal(3)">
+          <!-- 6: Piattelli -->
+          <div class="grid-item" onclick="openIGModal(6)">
             <div class="grid-thumb"><img src="Carrusel IG/Bodega Piatelli/16.png" loading="lazy"></div>
             <div class="grid-item-icon carousel-icon"></div>
             <div class="grid-overlay"><span>❤️ 340</span></div>
           </div>
-          <!-- 4: Calculadora de Raíces -->
-          <div class="grid-item" onclick="openIGModal(4)">
+          <!-- 7: Análisis Numérico -->
+          <div class="grid-item" onclick="openIGModal(7)">
             <div class="grid-thumb"><img src="Carrusel IG/Calculos de raices - Analisis numerico/11.png" loading="lazy">
             </div>
             <div class="grid-overlay"><span>❤️ 89</span></div>
           </div>
-          <!-- 5: Veteranos de Malvinas -->
-          <div class="grid-item" onclick="openIGModal(5)">
+          <!-- 8: Malvinas -->
+          <div class="grid-item" onclick="openIGModal(8)">
             <div class="grid-thumb"><img src="Carrusel IG/Entrevista a veteranos de malvinas/4.png" loading="lazy">
             </div>
             <div class="grid-overlay"><span>❤️ 412</span></div>
           </div>
-          <!-- 6: Cafetería -->
-          <div class="grid-item" onclick="openIGModal(6)">
+          <!-- 9: Cafetería -->
+          <div class="grid-item" onclick="openIGModal(9)">
             <div class="grid-thumb"><img src="Carrusel IG/Cafeteria - gestion de mesas en tiempo real/18.png"
                 loading="lazy"></div>
             <div class="grid-overlay"><span>❤️ 152</span></div>
           </div>
-          <!-- 7: Plotter Wizard (Cotizador) -->
-          <div class="grid-item" onclick="openIGModal(7)">
+          <!-- 10: Plotter Wizard -->
+          <div class="grid-item" onclick="openIGModal(10)">
             <div class="grid-thumb"><img src="Carrusel IG/Cotizador de planos/5.png" loading="lazy"></div>
             <div class="grid-item-icon carousel-icon"></div>
             <div class="grid-overlay"><span>❤️ 198</span></div>
           </div>
-          <!-- 8: Reality Plus -->
-          <div class="grid-item" onclick="openIGModal(8)">
+          <!-- 11: Reality Plus -->
+          <div class="grid-item" onclick="openIGModal(11)">
             <div class="grid-thumb"><img
                 src="Carrusel IG/Competencia Innovar - Aplicacion para maquetas de arquitectura/7.png" loading="lazy">
             </div>
             <div class="grid-item-icon carousel-icon"></div>
             <div class="grid-overlay"><span>❤️ 521</span></div>
           </div>
-          <!-- 9: My Garden (Bottom/Oldest) -->
-          <div class="grid-item" onclick="openIGModal(9)">
+          <!-- 12: My Garden -->
+          <div class="grid-item" onclick="openIGModal(12)">
             <div class="grid-thumb"><img src="Carrusel IG/My garden/1.png" loading="lazy"></div>
             <div class="grid-item-icon carousel-icon"></div>
             <div class="grid-overlay"><span>❤️ 214</span></div>
@@ -2958,11 +2950,12 @@
               <button class="modal-more">•••</button>
             </div>
             <div class="modal-right-body">
-              <div class="modal-caption-wrap">
+                <div class="modal-caption-wrap">
                 <img src="iconos/user.png" class="modal-av">
                 <div>
                   <span class="modal-username">pablocelaya</span>
                   <span id="modal-caption">Cargando...</span>
+                  <div id="modal-link-container" style="margin-top:6px;"></div>
                   <div class="modal-hashtags">#ingenieria #pablocelaya #tecnologia #argentina</div>
                 </div>
               </div>
@@ -3389,26 +3382,7 @@
         style="width:16px; height:16px; object-fit: contain;"> WhatsApp</div>
   </div>
 
-  <!-- MONKEY ASSISTANT -->
-  <div id="monkey-assistant"
-    style="position: fixed; bottom: 70px; right: 20px; z-index: 9000; display: none; align-items: flex-end; gap: 15px;">
-    <div
-      style="background: white; border: 2px solid #222; border-radius: 12px; padding: 14px 18px; position: relative; max-width: 240px; box-shadow: 0 8px 25px rgba(0,0,0,0.6);">
-      <p
-        style="color: #8a0303; font-family: 'Creepster', cursive; font-size: 20px; letter-spacing: 1.5px; text-shadow: 1px 1px 3px rgba(0,0,0,0.5); margin: 0; line-height: 1.3;">
-        ¡Buenas! 🩸 HAZ DOBLE CLIC EN LOS ÍCONOS para navegar o investiga el menú de inicio ANTES DE QUE SEA TARDE...
-        👁️
-      </p>
-      <!-- Balloon Tail -->
-      <div
-        style="position: absolute; bottom: 20px; right: -14px; width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 14px solid #222;">
-      </div>
-      <div
-        style="position: absolute; bottom: 20px; right: -10px; width: 0; height: 0; border-top: 10px solid transparent; border-bottom: 10px solid transparent; border-left: 10px solid white;">
-      </div>
-    </div>
-    <div class="monkey-anim"></div>
-  </div>
+
 
   <script>
     function toggleSub(id, row) {
@@ -3607,18 +3581,6 @@
       whoami: () => `<div class="term-line">Ingeniero en Informática en formación | Backend Dev | Systems Designer</div>`
     };
 
-    // FIX 5: Monkey now lasts 14 seconds (4s extra) before fading out
-    setTimeout(() => {
-      const monkey = document.getElementById('monkey-assistant');
-      if (monkey) {
-        monkey.style.transition = 'opacity 1s ease-out, transform 1s ease-out';
-        monkey.style.opacity = '0';
-        monkey.style.transform = 'translateY(100px)';
-        setTimeout(() => monkey.remove(), 1000);
-      }
-    }, 14000);
-
-
     function handleTermInput(e) {
       if (e.key !== 'Enter') return;
       const input = document.getElementById('term-input');
@@ -3651,20 +3613,6 @@
     }
 
     window.addEventListener('load', () => {
-      // Show monkey assistant after delay
-      setTimeout(() => {
-        const monkey = document.getElementById('monkey-assistant');
-        const errSound = document.getElementById('error-sound');
-        if (monkey) {
-          monkey.style.display = 'flex';
-          monkey.style.animation = 'winOpen 0.5s ease-out forwards';
-        }
-        if (errSound) {
-          errSound.volume = 0.8;
-          errSound.play().catch(e => console.log('Error sound autoplay block', e));
-        }
-      }, 4500);
-
       // Auto open about window
       setTimeout(() => openWindow('win-about'), 400);
     });
@@ -3723,9 +3671,28 @@
 
     const IG_PROJECTS = [
       {
+        title: "HogarOrden",
+        caption: "Sistema integral de gestión inteligente para el hogar. Automatización de tareas, control de gastos y organización familiar desde un solo lugar.",
+        location: "Salta, Argentina",
+        images: ["Carrusel IG/HogarOrden/1.png", "Carrusel IG/HogarOrden/2.png"]
+      },
+      {
+        title: "MIKIT",
+        caption: "Kit personal de herramientas digitales y recursos técnicos. Compilación de utilidades para el desarrollo y la productividad diaria.",
+        location: "Salta, Argentina",
+        images: ["Carrusel IG/MIKIT/1.png", "Carrusel IG/MIKIT/2.png"]
+      },
+      {
+        title: "SAD — Sistema de Asignación Docente",
+        caption: "Plataforma web para gestión y asignación de cargos docentes. Optimiza la distribución de horas cátedra en instituciones educativas.",
+        location: "Salta, Argentina",
+        images: ["Carrusel IG/Sistema de asignacion docente/1.png"]
+      },
+      {
         title: "Estudio Arquitectura",
         caption: "Landing page corporativa para estudio de arquitectura con portfolio interactivo. Diseño minimalista y moderno.",
         location: "Salta, Argentina",
+        link: "https://dev-pcr.github.io/portfolio-arquitectura/",
         images: [
           "Carrusel IG/Landing page para arquitecta/23.png",
           "Carrusel IG/Landing page para arquitecta/24.png",
@@ -3829,10 +3796,16 @@
       // Fill text data
       document.getElementById('modal-caption').innerText = project.caption;
       document.getElementById('modal-location').innerText = project.location;
+      const linkContainer = document.getElementById('modal-link-container');
+      if (project.link) {
+        linkContainer.innerHTML = `<a href="${project.link}" target="_blank" rel="noopener" style="color:#0095f6;font-size:13px;text-decoration:none;font-weight:600;">🔗 Ver sitio</a>`;
+      } else {
+        linkContainer.innerHTML = '';
+      }
 
       // Fill images
       const track = document.getElementById('modal-track');
-      track.innerHTML = project.images.map(img => `<img src="${img}" loading="lazy">`).join('');
+      track.innerHTML = project.images.map(img => `<img src="${img}" loading="lazy" onclick="openImgViewer('${img}')">`).join('');
 
       updateModalCarousel();
 
@@ -3885,7 +3858,7 @@
       </div>
       <div class="carousel-wrap" id="feed-c-${i}">
         <div class="carousel-track" id="feed-track-${i}">
-          ${p.images.map(img => `<div class="carousel-slide" style="padding:0;"><img src="${img}" style="width:100%;height:100%;object-fit:contain;"></div>`).join('')}
+          ${p.images.map(img => `<div class="carousel-slide"><img src="${img}" alt=""></div>`).join('')}
         </div>
         ${p.images.length > 1 ? `
           <button class="carousel-btn prev" onclick="feedSlide(${i}, -1)">❮</button>
@@ -3900,6 +3873,7 @@
       </div>
       <div class="post-likes" id="feed-likes-${i}">34 me gusta</div>
       <div class="post-caption"><span class="username">pablocelaya</span> ${p.caption}</div>
+      ${p.link ? `<div class="post-link" style="margin-top:6px;"><a href="${p.link}" target="_blank" rel="noopener" style="color:#0095f6;font-size:13px;text-decoration:none;font-weight:600;">🔗 Ver sitio</a></div>` : ''}
       <div class="post-time">hace 2 días</div>
     </div>
   `).join('');
@@ -3933,7 +3907,31 @@
 
     window.addEventListener('load', () => { });
 
+    // ── FULLSCREEN IMAGE VIEWER ──
+    function openImgViewer(src) {
+      const viewer = document.getElementById('img-viewer');
+      document.getElementById('img-viewer-src').src = src;
+      viewer.style.display = 'flex';
+      document.body.style.overflow = 'hidden';
+    }
+    function closeImgViewer() {
+      document.getElementById('img-viewer').style.display = 'none';
+      document.body.style.overflow = '';
+    }
   </script>
+
+  <!-- Fullscreen Image Viewer -->
+  <div id="img-viewer"
+    style="display:none;position:fixed;inset:0;z-index:99999;background:rgba(0,0,0,0.95);cursor:zoom-out;justify-content:center;align-items:center;"
+    onclick="closeImgViewer()">
+    <img id="img-viewer-src"
+      style="max-width:95%;max-height:95%;object-fit:contain;border-radius:4px;box-shadow:0 0 40px rgba(0,0,0,0.5);cursor:default;"
+      onclick="event.stopPropagation()">
+    <button
+      style="position:absolute;top:20px;right:24px;background:none;border:none;color:white;font-size:36px;cursor:pointer;font-family:system-ui;"
+      onclick="closeImgViewer()">✕</button>
+  </div>
+
 </body>
 
 </html>
